@@ -2,17 +2,25 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Iniciar Sesión</title>
-    <link rel="stylesheet" href="../css/styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - DevPortfolio</title>
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/auth.css">
 </head>
 <body>
-    <div class="container">
-        <h2>Acceso al Sistema</h2>
-        <form id="form-login">
-            <input type="text" id="identificador" placeholder="Usuario o Email" required>
-            <input type="password" id="password" placeholder="Contraseña" required>
-            <button type="submit">Ingresar</button>
-        </form>
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <h2>Bienvenido</h2>
+            <p class="subtitle">Ingresa tus credenciales para administrar tu portafolio</p>
+            <form id="form-login">
+                <input type="text" id="identificador" placeholder="Usuario o Email" required>
+                <input type="password" id="password" placeholder="Contraseña" required>
+                <button type="submit">Ingresar al sistema</button>
+            </form>
+            <div class="footer-links">
+                ¿No tienes cuenta? <a href="registro.html">Regístrate aquí</a>
+            </div>
+        </div>
     </div>
     <script src="../js/api.js"></script>
     <script src="../js/auth.js"></script>
