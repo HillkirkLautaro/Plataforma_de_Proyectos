@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaaS Portfolio de Desarrolladores</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header class="navbar">
+        <h1>Portafolio de Desarrolladores</h1>
+        <nav id="nav-menu">
+            <a href="index.html">Explorar</a>
+            <a href="views/login.html" id="btn-login-nav">Iniciar Sesión</a>
+            <a href="views/registro.html" id="btn-registro-nav">Registrarse</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section id="vista-publica">
+            <h2>Portafolios Públicos</h2>
+            <div id="lista-desarrolladores" class="grid-cards">
+                <!-- Se inyecta dinámicamente con JS -->
+            </div>
+        </section>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
