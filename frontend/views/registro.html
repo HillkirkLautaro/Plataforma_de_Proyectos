@@ -2,18 +2,26 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Registro de Desarrollador</title>
-    <link rel="stylesheet" href="../css/styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - DevPortfolio</title>
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/auth.css">
 </head>
 <body>
-    <div class="container">
-        <h2>Crear Cuenta de Desarrollador</h2>
-        <form id="form-registro">
-            <input type="text" id="username" placeholder="Usuario" required>
-            <input type="email" id="email" placeholder="Correo electrónico" required>
-            <input type="password" id="password" placeholder="Contraseña" required>
-            <button type="submit">Registrarme</button>
-        </form>
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <h2>Crear Cuenta</h2>
+            <p class="subtitle">Comienza a mostrar tus proyectos al mundo</p>
+            <form id="form-registro">
+                <input type="text" id="username" placeholder="Nombre de usuario" required>
+                <input type="email" id="email" placeholder="Correo electrónico" required>
+                <input type="password" id="password" placeholder="Contraseña" required>
+                <button type="submit">Crear cuenta</button>
+            </form>
+            <div class="footer-links">
+                ¿Ya tienes una cuenta? <a href="login.html">Inicia sesión</a>
+            </div>
+        </div>
     </div>
     <script src="../js/api.js"></script>
     <script src="../js/auth.js"></script>
