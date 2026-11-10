@@ -1,0 +1,12 @@
+.public-portfolio { display: grid; gap: 2rem; }
+.profile-card, .public-project { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; }
+.profile-card h2 { font-size: 2rem; margin-bottom: .5rem; }
+.profile-card p, .public-project p { color: var(--text-secondary); }
+.portfolio-projects h2, .portfolio-skills h2 { margin-bottom: 1rem; }
+.project-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+.public-project { display: grid; gap: .6rem; }
+.public-project h3 { color: var(--text-primary); }
+.project-meta { color: var(--text-secondary); font-size: .9rem; }
+.tag-list { display: flex; flex-wrap: wrap; gap: .6rem; }
+.tag { background: var(--bg-surface-hover); border: 1px solid var(--border-color); border-radius: 999px; padding: .3rem .75rem; color: var(--text-secondary); }
+.error-message { color: var(--danger); }

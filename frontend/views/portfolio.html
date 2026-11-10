@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio público | DevPortfolio</title>
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/portfolio.css">
+</head>
+<body>
+    <header class="navbar">
+        <h1>DevPortfolio</h1>
+        <nav id="nav-menu"><a href="/">Todos los desarrolladores</a><a href="/views/login.html" id="btn-login-nav">Iniciar sesión</a></nav>
+    </header>
+    <main class="container public-portfolio">
+        <p><a href="/">← Volver al directorio</a></p>
+        <section id="profile" class="profile-card" aria-live="polite"><p>Cargando portfolio…</p></section>
+        <section class="portfolio-projects">
+            <h2>Proyectos</h2>
+            <div id="projects" class="project-grid" aria-live="polite"></div>
+        </section>
+        <section class="portfolio-skills">
+            <h2>Habilidades</h2>
+            <div id="skills" class="tag-list"></div>
+        </section>
+    </main>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/portfolio.js"></script>
+</body>
+</html>
