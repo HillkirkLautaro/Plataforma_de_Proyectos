@@ -1,4 +1,5 @@
 from datetime import date
+from urllib.parse import urlparse
 
 from flask import Blueprint, current_app, jsonify, request
 from middlewares.auth_middleware import token_requerido
@@ -17,14 +18,49 @@ def _validar_payload(data, crear=False):
         return "nombre debe tener entre 1 y 120 caracteres"
     if "descripcion" in data and (not isinstance(data["descripcion"], str) or len(data["descripcion"]) > 20000):
         return "descripcion debe ser texto de hasta 20000 caracteres"
-    if "etapa" in data and data["etapa"] not in Proyecto.ETAPAS:
+    if "etapa" in data and (not isinstance(data["etapa"], str) or data["etapa"] not in Proyecto.ETAPAS):
         return "etapa no válida"
     for field in ("tecnologias", "lenguajes"):
         if field in data:
             values = data[field]
-            if not isinstance(values, list) or any(type(value) is not int or value <= 0 for value in values):
-                return f"{field} debe ser una lista de IDs enteros positivos"
-            data[field] = list(set(values))
+            if not isinstance(values, list):
+                return f"{field} debe ser una lista"
+            normalized = []
+            seen_ids = set()
+            for value in values:
+                # Se aceptan IDs simples por compatibilidad; los nuevos clientes envían {id, nivel}.
+                if type(value) is int:
+                    item_id, level = value, "intermedio"
+                elif isinstance(value, dict):
+                    item_id, level = value.get("id"), value.get("nivel", "intermedio")
+                else:
+                    return f"Cada elemento de {field} debe incluir un ID válido"
+                if type(item_id) is not int or item_id <= 0:
+                    return f"Cada ID de {field} debe ser un entero positivo"
+                if not isinstance(level, str) or level not in {"básico", "intermedio", "avanzado"}:
+                    return "nivel debe ser básico, intermedio o avanzado"
+                if item_id in seen_ids:
+                    return f"No se permiten IDs duplicados en {field}"
+                seen_ids.add(item_id)
+                normalized.append({"id": item_id, "nivel": level})
+            data[field] = normalized
+    if "links" in data:
+        if not isinstance(data["links"], list) or len(data["links"]) > 3:
+            return "links debe ser una lista de hasta 3 enlaces"
+        valid_types = {"demo", "github", "gitlab"}
+        seen_types = set()
+        for link in data["links"]:
+            if not isinstance(link, dict) or not isinstance(link.get("tipo"), str) or link["tipo"] not in valid_types:
+                return "Cada enlace debe tener tipo demo, github o gitlab"
+            url = link.get("url")
+            if not isinstance(url, str) or len(url) > 255:
+                return "La URL debe ser texto de hasta 255 caracteres"
+            parsed = urlparse(url)
+            if parsed.scheme not in {"http", "https"} or not parsed.netloc or parsed.username or parsed.password:
+                return "Cada enlace debe ser una URL HTTP/HTTPS válida"
+            if link["tipo"] in seen_types:
+                return "No se permiten enlaces duplicados del mismo tipo"
+            seen_types.add(link["tipo"])
     for field in ("fecha_inicio", "fecha_fin", "deadline"):
         if field in data and data[field] is not None:
             try:
@@ -83,8 +119,8 @@ def gestionar_proyecto(usuario_id, user_role, proyecto_id):
 
 def _guardar_proyecto(usuario_id, data, proyecto_id=None):
     try:
-        validar_ids_catalogo("tecnologias", data.get("tecnologias", []))
-        validar_ids_catalogo("lenguajes", data.get("lenguajes", []))
+        validar_ids_catalogo("tecnologias", [item["id"] for item in data.get("tecnologias", [])])
+        validar_ids_catalogo("lenguajes", [item["id"] for item in data.get("lenguajes", [])])
         result_id = Proyecto.guardar(usuario_id, data, proyecto_id)
         return jsonify({"mensaje": "Proyecto guardado", "id": result_id}), 200 if proyecto_id else 201
     except ValueError as exc:

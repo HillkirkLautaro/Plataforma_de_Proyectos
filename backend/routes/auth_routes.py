@@ -9,8 +9,29 @@ from models.usuario import Usuario
 
 auth_bp = Blueprint('auth_bp', __name__)
 
+
+def _hay_sesion_activa():
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return False
+    try:
+        parts = auth_header.split()
+        if len(parts) != 2:
+            return False
+        jwt.decode(
+            parts[1], current_app.config['JWT_SECRET'], algorithms=['HS256'],
+            issuer=current_app.config['JWT_ISSUER'],
+            options={'require': ['sub', 'exp', 'iat', 'iss', 'jti']},
+        )
+        return True
+    except jwt.InvalidTokenError:
+        return False
+
+
 @auth_bp.route('/register', methods=['POST'])
 def register():
+    if _hay_sesion_activa():
+        return jsonify({'error': 'Ya hay una sesión iniciada', 'redirect': '/dashboard'}), 409
     data = request.get_json(silent=True)
     if not isinstance(data, dict):
         return jsonify({'error': 'Se requiere un objeto JSON válido'}), 400
@@ -49,6 +70,10 @@ def register():
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
+    # No emitir una segunda sesión cuando el cliente ya presenta un JWT vigente.
+    if _hay_sesion_activa():
+        return jsonify({'error': 'Ya hay una sesión iniciada', 'redirect': '/dashboard'}), 409
+
     data = request.get_json(silent=True)
     if not isinstance(data, dict):
         return jsonify({'error': 'Se requiere un objeto JSON válido'}), 400

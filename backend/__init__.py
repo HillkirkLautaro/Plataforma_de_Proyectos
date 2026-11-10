@@ -52,6 +52,10 @@ def create_app():
     def serve_dashboard():
         return send_from_directory(os.path.join(frontend_dir, "views"), "dashboard.html")
 
+    @app.route("/portfolios/<int:usuario_id>")
+    def serve_public_portfolio(usuario_id):
+        return send_from_directory(os.path.join(frontend_dir, "views"), "portfolio.html")
+
     @app.errorhandler(413)
     def request_too_large(_error):
         return jsonify(error="El cuerpo de la solicitud excede el límite permitido"), 413
