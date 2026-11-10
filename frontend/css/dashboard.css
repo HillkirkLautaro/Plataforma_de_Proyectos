@@ -6,12 +6,27 @@
 #project-form { display: grid; gap: 1rem; margin-top: 1rem; }
 #project-form label { display: grid; gap: .35rem; color: var(--text-secondary); }
 #project-form input, #project-form textarea, #project-form select { width: 100%; padding: .7rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-main); color: var(--text-primary); font: inherit; }
-#project-form select[multiple] { min-height: 9rem; }
+.catalog-selector { display: grid; gap: .75rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 1rem; min-width: 0; }
+.catalog-selector legend { padding: 0 .4rem; color: var(--text-primary); font-weight: 700; }
+.catalog-search-label { display: grid; gap: .35rem; color: var(--text-secondary); }
+.catalog-hint, .selection-count { color: var(--text-secondary); font-size: .875rem; }
+.catalog-options { display: grid; gap: .6rem; max-height: 20rem; overflow-y: auto; }
+.catalog-option { display: grid; grid-template-columns: auto minmax(0, 1fr) minmax(150px, .5fr); align-items: center; gap: .75rem; padding: .65rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-main); }
+.catalog-option:has(input:checked) { border-color: var(--primary); background: var(--bg-surface-hover); }
+.catalog-option input[type="checkbox"] { width: 1.1rem !important; height: 1.1rem; accent-color: var(--primary); }
+.catalog-option-name { color: var(--text-primary); overflow-wrap: anywhere; }
+.catalog-option select { padding: .45rem !important; }
+.catalog-empty { color: var(--text-secondary); padding: .5rem; }
+.project-links { display: grid; gap: .75rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 1rem; }
+.project-links legend { padding: 0 .4rem; color: var(--text-primary); }
 .date-fields { display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem; }
 .project-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-top: 1rem; }
 .project-card { display: grid; gap: .5rem; }
+.project-links-list { display: flex; flex-wrap: wrap; gap: .75rem; }
+.project-links-list a { color: var(--primary); }
 .project-card p { color: var(--text-secondary); white-space: pre-wrap; }
 .project-card button, #logout { justify-self: start; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: transparent; color: var(--text-primary); cursor: pointer; padding: .5rem .8rem; }
 .project-card button:hover, #logout:hover { border-color: var(--danger); color: var(--danger); }
 #form-message { min-height: 1.5rem; color: var(--text-secondary); }
 @media (max-width: 640px) { .date-fields { grid-template-columns: 1fr; } }
+@media (max-width: 520px) { .catalog-option { grid-template-columns: auto minmax(0, 1fr); } .catalog-option select { grid-column: 1 / -1; } }
