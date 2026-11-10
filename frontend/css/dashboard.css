@@ -1,0 +1,17 @@
+.dashboard { display: grid; gap: 2rem; }
+.welcome, .panel-card, .project-card { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; }
+.welcome h2, .dashboard section > h2 { margin-bottom: .4rem; }
+.eyebrow { color: var(--primary); font-size: .75rem; font-weight: 700; letter-spacing: .12em; }
+.panel-card { max-width: 760px; }
+#project-form { display: grid; gap: 1rem; margin-top: 1rem; }
+#project-form label { display: grid; gap: .35rem; color: var(--text-secondary); }
+#project-form input, #project-form textarea, #project-form select { width: 100%; padding: .7rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-main); color: var(--text-primary); font: inherit; }
+#project-form select[multiple] { min-height: 9rem; }
+.date-fields { display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem; }
+.project-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-top: 1rem; }
+.project-card { display: grid; gap: .5rem; }
+.project-card p { color: var(--text-secondary); white-space: pre-wrap; }
+.project-card button, #logout { justify-self: start; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: transparent; color: var(--text-primary); cursor: pointer; padding: .5rem .8rem; }
+.project-card button:hover, #logout:hover { border-color: var(--danger); color: var(--danger); }
+#form-message { min-height: 1.5rem; color: var(--text-secondary); }
+@media (max-width: 640px) { .date-fields { grid-template-columns: 1fr; } }
