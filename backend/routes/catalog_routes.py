@@ -3,7 +3,7 @@ import requests
 from dotenv import load_dotenv
 from cachetools import TTLCache
 from flask import Blueprint, jsonify
-from werkzeug.exceptions import BadGateway, GatewayTimeout, InternalServerError
+from werkzeug.exceptions import BadGateway, GatewayTimeout, InternalServerError, Unauthorized, TooManyRequests
 
 load_dotenv()
 
@@ -32,21 +32,18 @@ def _obtener_datos_profesor(recurso: str):
     try:
         resp = requests.get(url, headers=headers, timeout=5)
 
-        if resp.status_code == 401:
-            raise Unauthorized(description="Grupo-Access-Key no autorizada o vencida.")
-
         if resp.status_code == 200:
             datos = resp.json()
             cache[recurso] = datos  # Guardar en caché solo si la respuesta fue exitosa
             return datos, 200
 
-        return resp.json(), resp.status_code
-        
-        # Si la API externa rechaza la clave por credencial inválida
         if resp.status_code == 401:
-            raise Unauthorized(description="GRUPO-ACCESS-KEY no autorizada o vencida.")
-            
-        return resp.json(), resp.status_code
+            raise Unauthorized(description="Grupo-Access-Key no autorizada o vencida.")
+        if resp.status_code == 429:
+            raise TooManyRequests(description="La API del profesor limitó las solicitudes.")
+        raise BadGateway(description=f"La API del profesor respondió HTTP {resp.status_code}.")
+    except (Unauthorized, TooManyRequests):
+        raise
     except requests.exceptions.Timeout:
         raise GatewayTimeout(description="Tiempo de espera agotado al conectar con el servicio externo.")
     except requests.exceptions.RequestException:
@@ -56,14 +53,10 @@ def _obtener_datos_profesor(recurso: str):
 @catalog_bp.route('/lenguajes', methods=['GET'])
 def get_lenguajes():
     try:
-            datos, status = _obtener_datos_profesor('lenguajes')
-            return jsonify(datos), status
-    except (BadGateway, GatewayTimeout):
-            # Fallback local en caso de falla del upstream
-            return jsonify([
-                {"id": 1, "nombre": "Javascript"},
-                {"id": 2, "nombre": "MySQL", "categoria": "base de datos"}
-            ]), 200
+        datos, status = _obtener_datos_profesor('lenguajes')
+        return jsonify(datos), status
+    except (BadGateway, GatewayTimeout, Unauthorized, TooManyRequests, InternalServerError) as exc:
+        return jsonify(error=exc.description), exc.code
 
 
 @catalog_bp.route('/tecnologias', methods=['GET'])
@@ -71,9 +64,5 @@ def get_tecnologias():
     try:
         datos, status = _obtener_datos_profesor('tecnologias')
         return jsonify(datos), status
-    except (BadGateway, GatewayTimeout):
-        # Fallback local en caso de falla del upstream
-        return jsonify([
-            {"id": 1, "nombre": "Flask", "categoria": "framework"},
-            {"id": 2, "nombre": "MySQL", "categoria": "base de datos"}
-        ]), 200
+    except (BadGateway, GatewayTimeout, Unauthorized, TooManyRequests, InternalServerError) as exc:
+        return jsonify(error=exc.description), exc.code
