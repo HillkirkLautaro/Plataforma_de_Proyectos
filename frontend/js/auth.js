@@ -14,12 +14,19 @@ async function enviarFormularioAuth(formulario, endpoint, payload, registrar = f
     const boton = formulario.querySelector('button[type="submit"]');
     boton.disabled = true;
     try {
+        const token = localStorage.getItem('jwt_token');
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers.Authorization = `Bearer ${token}`;
         const response = await fetch(`${API_BASE}/auth/${endpoint}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers,
             body: JSON.stringify(payload)
         });
         const data = await response.json().catch(() => ({}));
+        if (response.status === 409 && data.redirect) {
+            window.location.replace(data.redirect);
+            return;
+        }
         if (!response.ok) throw new Error(data.error || data.mensaje || 'No se pudo completar la solicitud');
         if (registrar) {
             alert('Cuenta creada. Ya podés iniciar sesión.');
@@ -47,6 +54,25 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const login = document.getElementById('form-login');
+    const authForm = login || registro;
+    const existingToken = localStorage.getItem('jwt_token');
+    if (authForm && existingToken) {
+        const button = authForm.querySelector('button[type="submit"]');
+        button.disabled = true;
+        fetch(`${API_BASE}/portfolio/perfil`, {
+            headers: { Authorization: `Bearer ${existingToken}` }
+        }).then(response => {
+            if (response.ok) {
+                window.location.replace('/dashboard');
+                return;
+            }
+            if (response.status === 401) {
+                localStorage.removeItem('jwt_token');
+                localStorage.removeItem('usuario');
+            }
+            button.disabled = false;
+        }).catch(() => { button.disabled = false; });
+    }
     if (login) login.addEventListener('submit', (event) => {
         event.preventDefault();
         enviarFormularioAuth(login, 'login', {
