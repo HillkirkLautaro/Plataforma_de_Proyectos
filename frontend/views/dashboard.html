@@ -10,7 +10,7 @@
 <body>
     <header class="navbar">
         <h1>DevPortfolio / Panel</h1>
-        <nav><a href="/">Portafolio público</a><button id="logout" type="button">Cerrar sesión</button></nav>
+        <nav><a href="/">Explorar</a><a id="public-portfolio-link" href="/">Ver mi portfolio público</a><button id="logout" type="button">Cerrar sesión</button></nav>
     </header>
     <main class="dashboard container">
         <section class="welcome"><p class="eyebrow">ÁREA PRIVADA</p><h2>Hola, <span id="developer-name">Desarrollador</span></h2><p>Gestioná los proyectos de tu portfolio.</p></section>
@@ -21,14 +21,28 @@
                 <label>Descripción<textarea name="descripcion" rows="3"></textarea></label>
                 <label>Etapa<select name="etapa"><option>formulación</option><option>modelado</option><option>implementación</option><option>testing</option><option>producción</option><option>mantenimiento</option></select></label>
                 <div class="date-fields"><label>Inicio<input type="date" name="fecha_inicio"></label><label>Fin<input type="date" name="fecha_fin"></label><label>Deadline<input type="date" name="deadline"></label></div>
-                <label>Tecnologías
-                    <select name="tecnologias" id="tecnologias" multiple size="5" aria-describedby="catalog-help"></select>
-                </label>
-                <label>Lenguajes
-                    <select name="lenguajes" id="lenguajes" multiple size="5" aria-describedby="catalog-help"></select>
-                </label>
-                <small id="catalog-help">Podés seleccionar varias opciones con Ctrl (Windows/Linux) o Cmd (Mac).</small>
+                <fieldset class="catalog-selector" id="tecnologias-selector">
+                    <legend>Tecnologías usadas en el proyecto</legend>
+                    <label class="catalog-search-label">Buscar tecnología<input id="tecnologias-search" type="search" placeholder="Ej.: React, Flask…" autocomplete="off"></label>
+                    <p class="catalog-hint">Marcá las opciones y elegí tu nivel de dominio para cada una.</p>
+                    <div id="tecnologias-options" class="catalog-options" aria-live="polite"></div>
+                    <small id="tecnologias-count" class="selection-count">Ninguna seleccionada</small>
+                </fieldset>
+                <fieldset class="catalog-selector" id="lenguajes-selector">
+                    <legend>Lenguajes utilizados</legend>
+                    <label class="catalog-search-label">Buscar lenguaje<input id="lenguajes-search" type="search" placeholder="Ej.: Python, JavaScript…" autocomplete="off"></label>
+                    <p class="catalog-hint">Podés seleccionar varios y especificar el dominio de cada uno.</p>
+                    <div id="lenguajes-options" class="catalog-options" aria-live="polite"></div>
+                    <small id="lenguajes-count" class="selection-count">Ninguno seleccionado</small>
+                </fieldset>
+                <fieldset class="project-links">
+                    <legend>Enlaces del proyecto (opcionales)</legend>
+                    <label>Demo en vivo<input type="url" name="link_demo" maxlength="255" placeholder="https://mi-demo.com"></label>
+                    <label>Repositorio GitHub<input type="url" name="link_github" maxlength="255" placeholder="https://github.com/usuario/repo"></label>
+                    <label>Repositorio GitLab<input type="url" name="link_gitlab" maxlength="255" placeholder="https://gitlab.com/usuario/repo"></label>
+                </fieldset>
                 <button class="btn-primary" type="submit">Guardar proyecto</button>
+                <button id="cancel-edit" type="button" hidden>Cancelar edición</button>
                 <p id="form-message" role="status"></p>
             </form>
         </section>
