@@ -1,8 +1,99 @@
 @startuml
-class Usuario {
-  +id: int
-  +username: str
-  +email: str
-  +password_hash: str
+title Modelo de clases y persistencia - Portfolio SaaS
+skinparam classAttributeIconSize 0
+
+class Usuario <<modelo / usuarios>> {
+  +id: INT <<PK, AI>>
+  +username: VARCHAR(50) <<UNIQUE, NOT NULL>>
+  +email: VARCHAR(100) <<UNIQUE, NOT NULL>>
+  +password_hash: VARCHAR(255) <<NOT NULL>>
+  +nombre_completo: VARCHAR(100) <<NULL>>
+  +bio: TEXT <<NULL>>
+  +rol: ENUM(usuario, admin) = usuario
+  +created_at: TIMESTAMP
+  -- Métodos de modelo --
+  +crear(username, email, password_plano, nombre_completo, bio): int
+  +obtener_por_credencial(identificador): dict
+  +verificar_password(password_hash, password_plano): bool
 }
+
+class Proyecto <<modelo / proyectos>> {
+  +id: INT <<PK, AI>>
+  +usuario_id: INT <<FK, NOT NULL>>
+  +nombre: VARCHAR(120) <<NOT NULL>>
+  +descripcion: TEXT <<NULL>>
+  +etapa: ENUM(formulación, modelado, implementación, testing, producción, mantenimiento)
+  +fecha_inicio: DATE <<NULL>>
+  +fecha_fin: DATE <<NULL>>
+  +deadline: DATE <<NULL>>
+  +created_at: TIMESTAMP
+  +updated_at: TIMESTAMP
+  -- Métodos de modelo --
+  +listar_usuario(usuario_id): list
+  +obtener(usuario_id, proyecto_id): dict | None
+  +guardar(usuario_id, datos, proyecto_id=None): int
+  +eliminar(usuario_id, proyecto_id): bool
+}
+
+class Habilidad <<modelo>> {
+  +asociar(usuario_id, tecnologia_id, nivel): int
+}
+
+class UsuarioHabilidad <<tabla: usuario_habilidades>> {
+  +id: INT <<PK, AI>>
+  +usuario_id: INT <<FK, NOT NULL>>
+  +tecnologia_id: INT <<catálogo externo>>
+  +nivel: ENUM(básico, intermedio, avanzado) <<NOT NULL>>
+  {unique} usuario_id, tecnologia_id
+}
+
+class ProyectoTecnologia <<tabla: proyecto_tecnologias>> {
+  +id: INT <<PK, AI>>
+  +proyecto_id: INT <<FK, NOT NULL>>
+  +tecnologia_id: INT <<catálogo externo>>
+  +nivel: ENUM(básico, intermedio, avanzado) = intermedio
+  {unique} proyecto_id, tecnologia_id
+}
+
+class ProyectoLenguaje <<tabla: proyecto_lenguajes>> {
+  +id: INT <<PK, AI>>
+  +proyecto_id: INT <<FK, NOT NULL>>
+  +lenguaje_id: INT <<catálogo externo>>
+  +nivel: ENUM(básico, intermedio, avanzado) = intermedio
+  {unique} proyecto_id, lenguaje_id
+}
+
+class ProyectoLink <<tabla: proyecto_links>> {
+  +id: INT <<PK, AI>>
+  +proyecto_id: INT <<FK, NOT NULL>>
+  +tipo: VARCHAR(50) <<NOT NULL>>
+  +url: VARCHAR(255) <<NOT NULL>>
+}
+
+class CatalogoProfesor <<API externa>> {
+  +tecnologias
+  +lenguajes
+}
+
+Usuario "1" *-- "0..*" Proyecto : propietario / ON DELETE CASCADE
+Usuario "1" -- "0..*" UsuarioHabilidad : habilidades
+Proyecto "1" *-- "0..*" ProyectoTecnologia : tecnologías / ON DELETE CASCADE
+Proyecto "1" *-- "0..*" ProyectoLenguaje : lenguajes / ON DELETE CASCADE
+Proyecto "1" *-- "0..*" ProyectoLink : enlaces / ON DELETE CASCADE
+UsuarioHabilidad ..> CatalogoProfesor : tecnologia_id
+ProyectoTecnologia ..> CatalogoProfesor : tecnologia_id
+ProyectoLenguaje ..> CatalogoProfesor : lenguaje_id
+Habilidad ..> UsuarioHabilidad : inserta
+
+note right of CatalogoProfesor
+  El esquema local no define tablas para los catálogos
+  ni claves foráneas para sus identificadores.
+  Tecnología y lenguaje se resuelven mediante la API
+  del Profesor.
+end note
+
+note bottom of UsuarioHabilidad
+  El esquema declara UNIQUE(usuario_id, tecnologia_id).
+  La FK usuario_id elimina sus habilidades en cascada.
+end note
 @enduml
