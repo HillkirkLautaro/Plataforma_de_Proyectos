@@ -1,0 +1,24 @@
+@startuml
+left to right direction
+actor "Usuario No Autenticado" as Anon
+actor "Usuario Autenticado" as User
+
+Anon <|-- User
+
+rectangle "Sistema Portfolio" {
+    usecase "Registrarse" as UC_Reg
+    usecase "Iniciar Sesión (JWT)" as UC_Login
+    usecase "Ver Portafolio Público" as UC_View
+    usecase "Consultar Catálogos" as UC_Cat
+    usecase "Gestionar Propios Proyectos" as UC_Proj
+    usecase "Gestionar Propias Habilidades" as UC_Skill
+}
+
+Anon --> UC_Reg
+Anon --> UC_Login
+Anon --> UC_View
+Anon --> UC_Cat
+
+User --> UC_Proj
+User --> UC_Skill
+@enduml
