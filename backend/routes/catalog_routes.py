@@ -2,7 +2,7 @@ import os
 import requests
 from dotenv import load_dotenv
 from cachetools import TTLCache
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from werkzeug.exceptions import BadGateway, GatewayTimeout, InternalServerError, Unauthorized, TooManyRequests
 
 load_dotenv()
@@ -53,16 +53,83 @@ def _obtener_datos_profesor(recurso: str):
 @catalog_bp.route('/lenguajes', methods=['GET'])
 def get_lenguajes():
     try:
+        # 1. Capturamos el parámetro ?nombre=... de la URL (si no viene, será None)
+        nombre_filtro = request.args.get('nombre', '').strip().lower()
+        
+        # 2. Obtenemos los datos (o puedes pasarle el parámetro si la API del profesor lo soporta)
         datos, status = _obtener_datos_profesor('lenguajes')
+        
+        # 3. Si enviaron un nombre en la URL y la respuesta fue exitosa, filtramos la lista
+        if nombre_filtro and status == 200 and isinstance(datos, list):
+            datos = [
+                item for item in datos
+                if nombre_filtro in item.get('nombre', '').lower()
+            ]
+            
         return jsonify(datos), status
     except (BadGateway, GatewayTimeout, Unauthorized, TooManyRequests, InternalServerError) as exc:
         return jsonify(error=exc.description), exc.code
 
+@catalog_bp.route('/lenguajes/<int:lenguaje_id>', methods=['GET'])
+def get_lenguaje_por_id(lenguaje_id):
+    try:
+        datos, status = _obtener_datos_profesor('lenguajes')
+        
+        if status == 200:
+            # Obtenemos la lista (ya sea directa o dentro de una clave del diccionario)
+            lista = datos if isinstance(datos, list) else next((v for v in datos.values() if isinstance(v, list)), [])
+            
+            # Buscamos el elemento que coincida con el ID
+            encontrado = next((item for item in lista if item.get('id') == lenguaje_id), None)
+            
+            if encontrado:
+                return jsonify(encontrado), 200
+            else:
+                return jsonify({"error": "Lenguaje no encontrada"}), 404
+                
+        return jsonify(datos), status
+    except (BadGateway, GatewayTimeout, Unauthorized, TooManyRequests, InternalServerError) as exc:
+        return jsonify(error=exc.description), exc.code
 
 @catalog_bp.route('/tecnologias', methods=['GET'])
 def get_tecnologias():
     try:
+        # 1. Capturamos el parámetro ?nombre=... de la URL (si no viene, será None)
+        nombre_filtro = request.args.get('nombre', '').strip().lower()
+        
+        # 2. Obtenemos los datos (o puedes pasarle el parámetro si la API del profesor lo soporta)
         datos, status = _obtener_datos_profesor('tecnologias')
+        
+        # 3. Si enviaron un nombre en la URL y la respuesta fue exitosa, filtramos la lista
+        if nombre_filtro and status == 200 and isinstance(datos, list):
+            datos = [
+                item for item in datos
+                if nombre_filtro in item.get('nombre', '').lower()
+            ]
+            
         return jsonify(datos), status
     except (BadGateway, GatewayTimeout, Unauthorized, TooManyRequests, InternalServerError) as exc:
         return jsonify(error=exc.description), exc.code
+
+@catalog_bp.route('/tecnologias/<int:tecnologia_id>', methods=['GET'])
+def get_tecnologia_por_id(tecnologia_id):
+    try:
+        datos, status = _obtener_datos_profesor('tecnologias')
+        
+        if status == 200:
+            # Obtenemos la lista (ya sea directa o dentro de una clave del diccionario)
+            lista = datos if isinstance(datos, list) else next((v for v in datos.values() if isinstance(v, list)), [])
+            
+            # Buscamos el elemento que coincida con el ID
+            encontrado = next((item for item in lista if item.get('id') == tecnologia_id), None)
+            
+            if encontrado:
+                return jsonify(encontrado), 200
+            else:
+                return jsonify({"error": "Tecnología no encontrada"}), 404
+                
+        return jsonify(datos), status
+    except (BadGateway, GatewayTimeout, Unauthorized, TooManyRequests, InternalServerError) as exc:
+        return jsonify(error=exc.description), exc.code
+
+

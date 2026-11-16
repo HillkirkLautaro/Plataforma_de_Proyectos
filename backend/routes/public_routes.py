@@ -27,20 +27,39 @@ def listar_desarrolladores():
 
 @public_bp.route("/portafolio/<int:usuario_id>", methods=["GET"])
 def ver_portafolio(usuario_id):
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    conn = None
+    cursor = None
     try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
         cursor.execute("SELECT id, username, nombre_completo, bio FROM usuarios WHERE id=%s", (usuario_id,))
         perfil = cursor.fetchone()
+        
         if not perfil:
-            return jsonify(error="Desarrollador no encontrado"), 404
+            return jsonify({"error": "Desarrollador no encontrado"}), 404
+            
         cursor.execute("SELECT tecnologia_id, nivel FROM usuario_habilidades WHERE usuario_id=%s", (usuario_id,))
         habilidades = cursor.fetchall()
+        
         proyectos = Proyecto.listar_usuario(usuario_id)
-        return jsonify(perfil=perfil, habilidades=habilidades, proyectos=proyectos), 200
-    except Exception:
+        
+        return jsonify({
+            "perfil": perfil,
+            "habilidades": habilidades,
+            "proyectos": proyectos
+        }), 200
+        
+    except Exception as e:
         current_app.logger.exception("Error cargando portfolio público")
-        return jsonify(error="No se pudo cargar el portfolio"), 500
+        # Asegúrate de devolver siempre un diccionario/objeto JSON válido
+        return jsonify({
+            "error": "No se pudo cargar el portfolio",
+            "message": str(e) if current_app.debug else "Error interno"
+        }), 500
+        
     finally:
-        cursor.close()
-        conn.close()
+        if cursor is not None:
+            cursor.close()
+        if conn is not None:
+            conn.close()
