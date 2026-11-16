@@ -1,0 +1,55 @@
+info:
+  name: GET /proyectos copy
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: http://192.168.0.50:5000/api/portfolio/proyectos
+  body:
+    type: json
+    data: |
+      {
+        "nombre": "Plataforma de Gestión de Proyectos",
+        "descripcion": "API REST en Flask con autenticación JWT y persistencia en MySQL.",
+        "etapa": "implementación",
+        "fecha_inicio": "2026-11-01",
+        "fecha_fin": null,
+        "deadline": "2026-12-15",
+        "tecnologias": [
+          {
+            "id": 1,
+            "nivel": "avanzado"
+          },
+          {
+            "id": 2,
+            "nivel": "intermedio"
+          }
+        ],
+        "lenguajes": [
+          {
+            "id": 1,
+            "nivel": "avanzado"
+          }
+        ],
+        "links": [
+          {
+            "tipo": "github",
+            "url": "https://github.com"
+          },
+          {
+            "tipo": "demo",
+            "url": "https://ejemplo.com"
+          }
+        ]
+      }
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidXNlcm5hbWUiOiJQcnVlYmExMjMiLCJyb2wiOiJ1c3VhcmlvIiwiaXNzIjoicG9ydGZvbGlvLWFwaSIsImlhdCI6MTc5NDg2MTAwMywiZXhwIjoxNzk0ODYyODAzLCJqdGkiOiJjMzgzNmMyNjQ1MzQ0YjNjOGEzNjg3ZjgyMzJiZjAwMSJ9.-u5DPya-mg8RWQcKm3JXnVK7meXsx8e8A22ja9DktXM
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

@@ -1,0 +1,16 @@
+info:
+  name: GET /tecnologias/<id>
+  type: http
+  seq: 4
+
+http:
+  method: GET
+  url: http://192.168.0.50:5000/api/catalogo/tecnologias/1
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

@@ -1,0 +1,23 @@
+info:
+  name: POST /register
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://192.168.0.50:5000/api/auth/register
+  body:
+    type: json
+    data: |-
+      {
+        "username":"Prueba123",
+        "email":"Test123@123.com",
+        "password":"1234567891011"
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

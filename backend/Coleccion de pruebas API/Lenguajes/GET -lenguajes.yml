@@ -1,0 +1,16 @@
+info:
+  name: GET /lenguajes
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: http://192.168.0.50:5000/api/catalogo/lenguajes
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

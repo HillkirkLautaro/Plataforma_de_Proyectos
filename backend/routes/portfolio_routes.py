@@ -103,7 +103,7 @@ def gestionar_proyecto(usuario_id, user_role, proyecto_id):
     if request.method == "DELETE":
         try:
             deleted = Proyecto.eliminar(usuario_id, proyecto_id)
-            return ("", 204) if deleted else (jsonify(error="Proyecto no encontrado"), 404)
+            return (jsonify(accion="Proyecto eliminado"), 200) if deleted else (jsonify(error="Proyecto no encontrado"), 404)
         except Exception:
             current_app.logger.exception("Error eliminando proyecto")
             return jsonify(error="No se pudo eliminar el proyecto"), 500
