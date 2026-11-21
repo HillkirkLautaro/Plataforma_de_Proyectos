@@ -24,7 +24,7 @@ async function enviarFormularioAuth(formulario, endpoint, payload, registrar = f
         });
         const data = await response.json().catch(() => ({}));
         if (response.status === 409 && data.redirect) {
-            window.location.replace(data.redirect);
+            window.location.replace('/views/dashboard.html');
             return;
         }
         if (!response.ok) throw new Error(data.error || data.mensaje || 'No se pudo completar la solicitud');
@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: { Authorization: `Bearer ${existingToken}` }
         }).then(response => {
             if (response.ok) {
-                window.location.replace('/dashboard');
+                window.location.replace('/views/dashboard.html');
                 return;
             }
             if (response.status === 401) {

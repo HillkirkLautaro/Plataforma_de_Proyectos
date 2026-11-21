@@ -58,7 +58,7 @@ function renderProject(project, techCatalog, languageCatalog) {
 
 document.addEventListener('DOMContentLoaded', async () => {
     await configurarMenuSesion();
-    const id = Number(window.location.pathname.split('/').filter(Boolean).at(-1));
+    const id = Number(new URLSearchParams(window.location.search).get('id'));
     const profileNode = document.getElementById('profile');
     const projectsNode = document.getElementById('projects');
     const skillsNode = document.getElementById('skills');
@@ -123,7 +123,7 @@ async function configurarMenuSesion() {
         nav.replaceChildren();
         const directory = document.createElement('a'); directory.href = '/'; directory.textContent = 'Todos los desarrolladores';
         const username = document.createElement('span'); username.textContent = user.nombre_completo || user.username;
-        const dashboard = document.createElement('a'); dashboard.href = '/dashboard'; dashboard.textContent = 'Mi panel';
+        const dashboard = document.createElement('a'); dashboard.href = '/views/dashboard.html'; dashboard.textContent = 'Mi panel';
         const logout = document.createElement('button'); logout.type = 'button'; logout.textContent = 'Cerrar sesión';
         logout.addEventListener('click', cerrarSesion);
         nav.append(directory, username, dashboard, logout);

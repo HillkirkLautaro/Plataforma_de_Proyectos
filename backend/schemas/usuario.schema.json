@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portfolio.local/schemas/usuario.schema.json",
+  "title": "Usuario",
+  "description": "Datos aceptados para registrar un usuario.",
+  "type": "object",
+  "properties": {
+    "username": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 50,
+      "pattern": "^[A-Za-z0-9_.-]+$"
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "maxLength": 100
+    },
+    "password": {
+      "type": "string",
+      "minLength": 12,
+      "maxLength": 72
+    },
+    "nombre_completo": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "bio": {
+      "type": "string",
+      "maxLength": 10000
+    }
+  },
+  "required": ["username", "email", "password"],
+  "additionalProperties": false
+}

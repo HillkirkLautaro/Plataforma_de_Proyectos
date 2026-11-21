@@ -1,7 +1,23 @@
+import json
+from pathlib import Path
+
 from werkzeug.security import generate_password_hash, check_password_hash
 from config.db import get_db_connection
 
+
+SCHEMAS_DIR = Path(__file__).resolve().parent.parent / "schemas"
+
+
 class Usuario:
+    @classmethod
+    def cargar_schemas(cls):
+        cls.SCHEMA_REGISTRO = json.loads(
+            (SCHEMAS_DIR / "usuario.schema.json").read_text(encoding="utf-8")
+        )
+        cls.SCHEMA_LOGIN = json.loads(
+            (SCHEMAS_DIR / "login.schema.json").read_text(encoding="utf-8")
+        )
+
     def __init__(self, id=None, username="", email="", password_hash="", nombre_completo="", bio="", rol="usuario"):
         self.id = id
         self.username = username
@@ -54,3 +70,6 @@ class Usuario:
     @staticmethod
     def verificar_password(password_hash, password_plano):
         return check_password_hash(password_hash, password_plano)
+
+
+Usuario.cargar_schemas()

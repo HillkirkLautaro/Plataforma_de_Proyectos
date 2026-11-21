@@ -4,10 +4,19 @@ import uuid
 
 import jwt
 from flask import Blueprint, current_app, request, jsonify
+from jsonschema import Draft202012Validator, FormatChecker, ValidationError
 from mysql.connector import IntegrityError
 from models.usuario import Usuario
 
 auth_bp = Blueprint('auth_bp', __name__)
+
+
+def _validar_schema(data, schema):
+    try:
+        Draft202012Validator(schema, format_checker=FormatChecker()).validate(data)
+    except ValidationError as exc:
+        return exc.message
+    return None
 
 
 def _hay_sesion_activa():
@@ -53,6 +62,11 @@ def register():
         return jsonify({'error': 'nombre_completo y bio deben ser texto'}), 400
     if len(nombre) > 100 or len(bio) > 10000:
         return jsonify({'error': 'Algún campo excede la longitud permitida'}), 400
+    payload_validacion = dict(data)
+    payload_validacion.update(username=username, email=email)
+    error_schema = _validar_schema(payload_validacion, Usuario.SCHEMA_REGISTRO)
+    if error_schema:
+        return jsonify({'error': error_schema}), 400
     try:
         user_id = Usuario.crear(
             username,
@@ -77,6 +91,9 @@ def login():
     data = request.get_json(silent=True)
     if not isinstance(data, dict):
         return jsonify({'error': 'Se requiere un objeto JSON válido'}), 400
+    error_schema = _validar_schema(data, Usuario.SCHEMA_LOGIN)
+    if error_schema:
+        return jsonify({'error': error_schema}), 400
     identificador = data.get('username') or data.get('email')
     password = data.get('password')
     if not isinstance(identificador, str) or not isinstance(password, str) or not identificador or not password:

@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let cached = null;
     try { cached = JSON.parse(localStorage.getItem('usuario') || 'null'); } catch (_) { localStorage.removeItem('usuario'); }
     if (token) {
-        nav.innerHTML = '<a href="/">Explorar</a><span class="nav-user"></span><a href="/dashboard">Mi panel</a><button type="button" id="logout-nav">Cerrar sesión</button>';
+        nav.innerHTML = '<a href="/">Explorar</a><span class="nav-user"></span><a href="/views/dashboard.html">Mi panel</a><button type="button" id="logout-nav">Cerrar sesión</button>';
         nav.querySelector('.nav-user').textContent = cached?.nombre_completo || cached?.username || 'Mi cuenta';
         document.getElementById('logout-nav').addEventListener('click', cerrarSesion);
         fetch(`${API_BASE}/portfolio/perfil`, { headers: { Authorization: `Bearer ${token}` } })
@@ -53,7 +53,7 @@ async function cargarDesarrolladores() {
             details.append(name, bio, count);
             const link = document.createElement('a');
             link.className = 'btn-primary portfolio-link';
-            link.href = `/portfolios/${encodeURIComponent(developer.id)}`;
+            link.href = `/views/portfolio.html?id=${encodeURIComponent(developer.id)}`;
             link.textContent = 'Ver portfolio';
             card.append(details, link);
             container.append(card);

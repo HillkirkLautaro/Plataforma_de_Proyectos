@@ -100,7 +100,7 @@ async function cargarPerfil() {
     const user = await apiRequest('/portfolio/perfil');
     localStorage.setItem('usuario', JSON.stringify(user));
     document.getElementById('developer-name').textContent = user.nombre_completo || user.username;
-    document.getElementById('public-portfolio-link').href = `/portfolios/${encodeURIComponent(user.id)}`;
+    document.getElementById('public-portfolio-link').href = `/views/portfolio.html?id=${encodeURIComponent(user.id)}`;
 }
 
 function mostrarProyectos(projects) {

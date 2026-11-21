@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portfolio.local/schemas/login.schema.json",
+  "title": "Inicio de sesión",
+  "description": "Credenciales aceptadas por POST /api/auth/login.",
+  "type": "object",
+  "properties": {
+    "username": {"type": "string", "minLength": 1},
+    "email": {"type": "string", "minLength": 1},
+    "password": {"type": "string", "minLength": 1}
+  },
+  "required": ["password"],
+  "anyOf": [
+    {"required": ["username"]},
+    {"required": ["email"]}
+  ],
+  "additionalProperties": false
+}

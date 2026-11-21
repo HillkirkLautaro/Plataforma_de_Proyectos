@@ -1,11 +1,31 @@
 """Persistencia SQL de proyectos y relaciones con catálogos externos."""
 
+import json
+from pathlib import Path
+
 from config.db import get_db_connection
+
+
+SCHEMAS_DIR = Path(__file__).resolve().parent.parent / "schemas"
 
 
 class Proyecto:
     ETAPAS = {"formulación", "modelado", "implementación", "testing", "producción", "mantenimiento"}
     CAMPOS = {"nombre", "descripcion", "etapa", "fecha_inicio", "fecha_fin", "deadline"}
+
+    @classmethod
+    def cargar_schemas(cls):
+        archivos_schema = {
+            "proyecto": "proyecto.schema.json",
+            "proyecto_crear": "proyecto_crear.schema.json",
+            "proyecto_tecnologia": "proyecto_tecnologia.schema.json",
+            "proyecto_lenguaje": "proyecto_lenguaje.schema.json",
+            "proyecto_link": "proyecto_link.schema.json",
+        }
+        cls.SCHEMAS = {
+            nombre: json.loads((SCHEMAS_DIR / archivo).read_text(encoding="utf-8"))
+            for nombre, archivo in archivos_schema.items()
+        }
 
     @staticmethod
     def listar_usuario(usuario_id):
@@ -118,3 +138,6 @@ class Proyecto:
         finally:
             cursor.close()
             conn.close()
+
+
+Proyecto.cargar_schemas()

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portfolio.local/schemas/proyecto_tecnologia.schema.json",
+  "title": "Tecnología asociada a proyecto",
+  "description": "Referencia enviada en tecnologias; nivel es opcional y por defecto intermedio.",
+  "oneOf": [
+    {"type": "integer", "minimum": 1},
+    {
+      "type": "object",
+      "properties": {
+        "id": {"type": "integer", "minimum": 1},
+        "nivel": {"type": "string", "enum": ["básico", "intermedio", "avanzado"]}
+      },
+      "required": ["id"],
+      "additionalProperties": false
+    }
+  ]
+}

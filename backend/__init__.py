@@ -3,7 +3,7 @@
 import os
 
 from dotenv import load_dotenv
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify
 from flask_cors import CORS
 
 
@@ -18,8 +18,8 @@ def create_app():
     if not secret or len(secret) < 32:
         raise RuntimeError("Definí JWT_SECRET (o SECRET_KEY) con al menos 32 caracteres en .env")
 
-    frontend_dir = os.path.join(project_dir, "frontend")
-    app = Flask(__name__, static_folder=frontend_dir, static_url_path="")
+    # El backend expone únicamente endpoints HTTP; el frontend se despliega por separado.
+    app = Flask(__name__, static_folder=None)
     app.config.update(
         JWT_SECRET=secret,
         JWT_ISSUER=os.environ.get("JWT_ISSUER", "portfolio-api"),
@@ -27,7 +27,7 @@ def create_app():
         MAX_CONTENT_LENGTH=16 * 1024,
     )
     origins = [origin.strip() for origin in os.environ.get("CORS_ORIGINS", "").split(",") if origin.strip()]
-    # La misma aplicación sirve el frontend; solo abrir CORS cross-origin si se configura explícitamente.
+    # Permitir solicitudes cross-origin solo para los orígenes configurados explícitamente.
     CORS(app, origins=origins, allow_headers=["Content-Type", "Authorization"])
 
     # Las rutas antiguas usan imports absolutos desde backend/.
@@ -44,20 +44,12 @@ def create_app():
     app.register_blueprint(public_bp, url_prefix="/api")
     app.register_blueprint(portfolio_bp, url_prefix="/api/portfolio")
 
-    @app.route("/")
-    def serve_frontend():
-        return send_from_directory(frontend_dir, "index.html")
-
-    @app.route("/dashboard")
-    def serve_dashboard():
-        return send_from_directory(os.path.join(frontend_dir, "views"), "dashboard.html")
-
-    @app.route("/portfolios/<int:usuario_id>")
-    def serve_public_portfolio(usuario_id):
-        return send_from_directory(os.path.join(frontend_dir, "views"), "portfolio.html")
-
     @app.errorhandler(413)
     def request_too_large(_error):
         return jsonify(error="El cuerpo de la solicitud excede el límite permitido"), 413
+
+    @app.errorhandler(404)
+    def not_found(_error):
+        return jsonify(error="Ruta de API no encontrada"), 404
 
     return app

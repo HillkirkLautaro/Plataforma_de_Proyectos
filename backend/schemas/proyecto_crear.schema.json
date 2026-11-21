@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portfolio.local/schemas/proyecto_crear.schema.json",
+  "title": "Crear proyecto",
+  "type": "object",
+  "properties": {
+    "nombre": {"type": "string", "minLength": 1, "maxLength": 120},
+    "descripcion": {"type": "string", "maxLength": 20000},
+    "etapa": {
+      "type": "string",
+      "enum": ["formulación", "modelado", "implementación", "testing", "producción", "mantenimiento"]
+    },
+    "fecha_inicio": {"anyOf": [{"type": "string", "format": "date"}, {"type": "null"}]},
+    "fecha_fin": {"anyOf": [{"type": "string", "format": "date"}, {"type": "null"}]},
+    "deadline": {"anyOf": [{"type": "string", "format": "date"}, {"type": "null"}]},
+    "tecnologias": {"type": "array", "items": {"$ref": "#/$defs/referenciaCatalogo"}},
+    "lenguajes": {"type": "array", "items": {"$ref": "#/$defs/referenciaCatalogo"}},
+    "links": {"type": "array", "maxItems": 3, "items": {"$ref": "#/$defs/enlace"}}
+  },
+  "required": ["nombre"],
+  "additionalProperties": false,
+  "$defs": {
+    "referenciaCatalogo": {
+      "oneOf": [
+        {"type": "integer", "minimum": 1},
+        {
+          "type": "object",
+          "properties": {
+            "id": {"type": "integer", "minimum": 1},
+            "nivel": {"type": "string", "enum": ["básico", "intermedio", "avanzado"]}
+          },
+          "required": ["id"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "enlace": {
+      "type": "object",
+      "properties": {
+        "tipo": {"type": "string", "enum": ["demo", "github", "gitlab"]},
+        "url": {"type": "string", "format": "uri", "pattern": "^https?://(?![^/?#]*@)[^/?#\\s]+[^\\s]*$", "maxLength": 255}
+      },
+      "required": ["tipo", "url"],
+      "additionalProperties": false
+    }
+  }
+}

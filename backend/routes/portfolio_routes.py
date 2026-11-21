@@ -1,17 +1,58 @@
 from datetime import date
+import json
+from pathlib import Path
 from urllib.parse import urlparse
 
 from flask import Blueprint, current_app, jsonify, request
+from jsonschema import Draft202012Validator, FormatChecker, ValidationError
 from middlewares.auth_middleware import token_requerido
 from models.proyecto import Proyecto
 from services.catalog_service import CatalogUnavailable, validar_ids_catalogo
 
 portfolio_bp = Blueprint("portfolio_bp", __name__)
 
+_SCHEMAS_DIR = Path(__file__).resolve().parent.parent / "schemas"
+
+
+def _cargar_schema(nombre):
+    with (_SCHEMAS_DIR / nombre).open(encoding="utf-8") as archivo:
+        return json.load(archivo)
+
+
+_PROYECTO_SCHEMA = _cargar_schema("proyecto.schema.json")
+_PROYECTO_CREAR_SCHEMA = _cargar_schema("proyecto_crear.schema.json")
+_PROYECTO_TECNOLOGIA_SCHEMA = _cargar_schema("proyecto_tecnologia.schema.json")
+_PROYECTO_LENGUAJE_SCHEMA = _cargar_schema("proyecto_lenguaje.schema.json")
+_PROYECTO_LINK_SCHEMA = _cargar_schema("proyecto_link.schema.json")
+
+
+def _validar_con_schema(data, schema):
+    try:
+        Draft202012Validator(schema, format_checker=FormatChecker()).validate(data)
+    except ValidationError as exc:
+        return exc.message
+    return None
+
 
 def _validar_payload(data, crear=False):
     if not isinstance(data, dict):
         return "Se requiere un objeto JSON"
+    schema = _PROYECTO_CREAR_SCHEMA if crear else _PROYECTO_SCHEMA
+    error_schema = _validar_con_schema(data, schema)
+    if error_schema:
+        return error_schema
+
+    for campo, schema_relacion in (("tecnologias", _PROYECTO_TECNOLOGIA_SCHEMA),
+                                   ("lenguajes", _PROYECTO_LENGUAJE_SCHEMA)):
+        for relacion in data.get(campo, []):
+            error_schema = _validar_con_schema(relacion, schema_relacion)
+            if error_schema:
+                return f"Elemento inválido en {campo}: {error_schema}"
+    for enlace in data.get("links", []):
+        error_schema = _validar_con_schema(enlace, _PROYECTO_LINK_SCHEMA)
+        if error_schema:
+            return f"Enlace inválido: {error_schema}"
+
     if crear and not isinstance(data.get("nombre"), str):
         return "nombre es obligatorio y debe ser texto"
     if "nombre" in data and (not isinstance(data["nombre"], str) or not 1 <= len(data["nombre"].strip()) <= 120):
@@ -78,8 +119,7 @@ def listar_proyectos(usuario_id, user_role):
     except Exception:
         current_app.logger.exception("Error listando proyectos")
         return jsonify(error="No se pudieron cargar los proyectos"), 500
-
-
+    
 @portfolio_bp.post("/proyectos")
 @token_requerido
 def crear_proyecto(usuario_id, user_role):

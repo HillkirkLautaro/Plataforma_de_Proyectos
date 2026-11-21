@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portfolio.local/schemas/habilidad.schema.json",
+  "title": "Habilidad de usuario",
+  "description": "Relación entre un usuario y una tecnología del catálogo externo.",
+  "type": "object",
+  "properties": {
+    "tecnologia_id": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "nivel": {
+      "type": "string",
+      "enum": ["básico", "intermedio", "avanzado"]
+    }
+  },
+  "required": ["tecnologia_id", "nivel"],
+  "additionalProperties": false
+}
