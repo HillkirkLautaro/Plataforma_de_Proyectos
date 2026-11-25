@@ -1,0 +1,35 @@
+info:
+  name: POST /portfolio/proyectos (fechas inválidas -> 400)
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/portfolio/proyectos"
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "Proyecto Inválido",
+        "etapa": "implementación",
+        "fecha_inicio": "2025-10-01",
+        "fecha_fin": "2025-01-01",
+        "tecnologias": [{{techId}}],
+        "lenguajes": [{{langId}}]
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("Rechaza fecha_fin anterior a fecha_inicio con 400", function () {
+          expect(res.getStatus()).to.equal(400);
+          expect(res.getBody().error).to.be.a("string");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

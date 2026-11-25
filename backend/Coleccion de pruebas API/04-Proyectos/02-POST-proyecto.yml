@@ -1,0 +1,46 @@
+info:
+  name: POST /portfolio/proyectos
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/portfolio/proyectos"
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "Proyecto Bruno Automatizado",
+        "descripcion": "Creado desde la colección de pruebas de Bruno.",
+        "etapa": "implementación",
+        "fecha_inicio": "2025-06-01",
+        "deadline": "2026-12-01",
+        "tecnologias": [
+          { "id": {{techId}}, "nivel": "intermedio" }
+        ],
+        "lenguajes": [
+          { "id": {{langId}}, "nivel": "avanzado" }
+        ],
+        "links": [
+          { "tipo": "github", "url": "https://github.com/usuario/proyecto-bruno" }
+        ]
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("Crea proyecto exitosamente -> 201 Created", function () {
+          expect(res.getStatus()).to.equal(201);
+          const body = res.getBody();
+          expect(body.id).to.be.a("number");
+          expect(body.proyecto).to.be.an("object");
+          bru.setVar("projectId", body.id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

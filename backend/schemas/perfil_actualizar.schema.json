@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portfolio.local/schemas/perfil_actualizar.schema.json",
+  "title": "Actualizar perfil de usuario",
+  "description": "Datos personales editables del usuario autenticado.",
+  "type": "object",
+  "properties": {
+    "nombre_completo": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "bio": {
+      "type": "string",
+      "maxLength": 10000
+    }
+  },
+  "minProperties": 1,
+  "additionalProperties": false
+}

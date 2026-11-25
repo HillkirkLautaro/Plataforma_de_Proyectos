@@ -1,0 +1,24 @@
+info:
+  name: GET ruta inexistente (-> 404 JSON)
+  type: http
+  seq: 3
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/ruta-inexistente-bruno"
+  auth: none
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("Devuelve 404 con JSON amigable en español", function () {
+          expect(res.getStatus()).to.equal(404);
+          expect(res.getBody().error).to.be.a("string");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,90 +1,206 @@
+/* ==========================================================================
+   1. Layout de Autenticación
+   ========================================================================== */
 .auth-wrapper {
-    min-height: calc(100vh - 75px);
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1.5rem;
+    padding: var(--space-6);
 }
 
+/* ==========================================================================
+   2. Tarjeta y Encabezado
+   ========================================================================== */
 .auth-card {
     background-color: var(--bg-surface);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
-    padding: 2.5rem;
+    padding: var(--space-8);
     width: 100%;
-    max-width: 420px;
-    box-shadow: var(--shadow);
+    max-width: 430px;
+    box-shadow: var(--shadow-md);
+}
+
+.auth-brand {
+    display: block;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: var(--space-2);
 }
 
 .auth-card h2 {
-    font-size: 1.6rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
+    font-size: 1.7rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    margin-bottom: var(--space-2);
     text-align: center;
+    color: var(--text-primary);
 }
 
-.auth-card p.subtitle {
+.auth-card .subtitle {
     text-align: center;
     color: var(--text-secondary);
-    font-size: 0.9rem;
-    margin-bottom: 2rem;
+    font-size: 0.925rem;
+    margin-bottom: var(--space-6);
 }
 
+/* ==========================================================================
+   3. Formulario y Controles
+   ========================================================================== */
 .auth-card form {
     display: flex;
     flex-direction: column;
-    gap: 1.2rem;
+    gap: var(--space-4);
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.form-field label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
 }
 
 .auth-card input {
     width: 100%;
-    padding: 0.75rem 1rem;
-    background-color: var(--bg-main);
+    padding: 0.78rem 1rem;
+    background-color: var(--bg-input);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
     color: var(--text-primary);
+    font-family: inherit;
     font-size: 0.95rem;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+}
+
+.auth-card input::placeholder {
+    color: var(--text-muted);
+}
+
+.auth-card input:hover {
+    border-color: var(--border-strong);
+}
+
+.auth-card input:focus-visible {
     outline: none;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.auth-card input:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+    box-shadow: var(--shadow-focus);
 }
 
-.auth-card button {
+.auth-card button[type="submit"] {
+    margin-top: var(--space-2);
     background-color: var(--primary);
     color: #ffffff;
+    font-family: inherit;
     font-weight: 600;
-    font-size: 1rem;
-    padding: 0.75rem;
+    font-size: 0.975rem;
+    padding: 0.8rem 1rem;
     border: none;
     border-radius: var(--radius-sm);
     cursor: pointer;
-    transition: background 0.2s ease, transform 0.05s ease;
+    box-shadow: var(--shadow-sm);
+    transition: background-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-.auth-card button:hover {
+.auth-card button[type="submit"]:hover {
     background-color: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
 }
 
-.auth-card button:active {
-    transform: scale(0.98);
+.auth-card button[type="submit"]:active {
+    transform: translateY(0);
+}
+
+.auth-card button[type="submit"]:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.auth-status {
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: center;
+    border-radius: var(--radius-sm);
+}
+
+.auth-status:empty {
+    display: none;
+}
+
+.auth-status[data-estado="success"] {
+    color: var(--success);
+    padding: 0.65rem 0.9rem;
+    background-color: var(--success-soft);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.auth-status[data-estado="error"] {
+    color: var(--danger);
+    padding: 0.65rem 0.9rem;
+    background-color: var(--danger-soft);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+/* Enlaces inferiores */
+.auth-footer {
+    margin-top: var(--space-6);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
 }
 
 .auth-card .footer-links {
-    margin-top: 1.5rem;
     text-align: center;
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     color: var(--text-secondary);
 }
 
-.auth-card .footer-links a {
+.auth-card .footer-links a,
+.auth-card a.footer-links {
     color: var(--primary);
+    font-weight: 600;
     text-decoration: none;
 }
 
-.auth-card .footer-links a:hover {
+.auth-card .footer-links a:hover,
+.auth-card a.footer-links:hover {
     text-decoration: underline;
+}
+
+.auth-card a.footer-links {
+    display: inline-block;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.auth-card a.footer-links:hover {
+    color: var(--text-primary);
+}
+
+/* ==========================================================================
+   4. Responsive
+   ========================================================================== */
+@media (max-width: 480px) {
+    .auth-wrapper {
+        padding: var(--space-4);
+    }
+
+    .auth-card {
+        padding: var(--space-6);
+        border-radius: var(--radius-md);
+    }
 }

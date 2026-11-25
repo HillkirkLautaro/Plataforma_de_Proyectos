@@ -1,0 +1,30 @@
+info:
+  name: PUT /portfolio/perfil/habilidades/:tipo/:id
+  type: http
+  seq: 6
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/api/portfolio/perfil/habilidades/tecnologia/{{techId}}"
+  body:
+    type: json
+    data: |-
+      {
+        "nivel": "avanzado"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("Actualiza nivel de habilidad existente -> 200 OK", function () {
+          expect(res.getStatus()).to.equal(200);
+          expect(res.getBody().habilidad.nivel).to.equal("avanzado");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

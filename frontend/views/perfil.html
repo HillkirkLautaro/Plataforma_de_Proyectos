@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil | DevPortfolio</title>
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/perfil.css">
+</head>
+<body>
+    <header class="navbar">
+        <h1>DevPortfolio / Mi Perfil</h1>
+        <nav>
+            <a href="/">Explorar</a>
+            <a href="/views/dashboard.html">Mi panel</a>
+            <a href="/views/perfil.html" aria-current="page">Mi Perfil</a>
+            <a id="public-portfolio-link" href="/">Ver mi portfolio público</a>
+            <button id="logout" type="button">Cerrar sesión</button>
+        </nav>
+    </header>
+
+    <main class="profile-page container">
+        <section class="profile-hero">
+            <p class="eyebrow">CUENTA Y PERFIL</p>
+            <h2>Mi Perfil Profesional</h2>
+            <p>Actualiza tu presentación y gestiona las tecnologías y lenguajes que dominas.</p>
+        </section>
+
+        <!-- 1. Datos del Perfil -->
+        <section class="profile-card-panel">
+            <h3>Datos del Perfil</h3>
+            <div class="readonly-grid">
+                <div class="readonly-field">
+                    <span class="field-label">Nombre de usuario</span>
+                    <strong id="perfil-username" class="readonly-value">—</strong>
+                </div>
+                <div class="readonly-field">
+                    <span class="field-label">Correo electrónico</span>
+                    <strong id="perfil-email" class="readonly-value">—</strong>
+                </div>
+            </div>
+
+            <form id="perfil-form">
+                <div class="form-group">
+                    <div class="label-row">
+                        <label for="nombre_completo">Nombre completo</label>
+                        <small id="nombre-count" class="char-counter">0 / 100</small>
+                    </div>
+                    <input type="text" id="nombre_completo" name="nombre_completo" maxlength="100" placeholder="Tu nombre y apellido">
+                </div>
+
+                <div class="form-group">
+                    <div class="label-row">
+                        <label for="bio">Descripción profesional</label>
+                        <small id="bio-count" class="char-counter">0 / 10000</small>
+                    </div>
+                    <textarea id="bio" name="bio" rows="5" maxlength="10000" placeholder="Cuéntale a otros desarrolladores y reclutadores sobre tu experiencia, intereses y enfoque técnico..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn-primary" type="submit" id="btn-guardar-perfil">Guardar cambios</button>
+                </div>
+                <p id="perfil-message" class="status-message" role="status" aria-live="polite"></p>
+            </form>
+        </section>
+
+        <!-- 2. Mis Habilidades (Tecnologías y Lenguajes) -->
+        <section class="profile-card-panel">
+            <h3>Mis Habilidades</h3>
+            <p class="panel-subtitle">Agrega tecnologías y lenguajes desde los catálogos oficiales e indica tu nivel de dominio.</p>
+
+            <form id="habilidad-form" class="skill-form">
+                <div class="form-group">
+                    <label for="habilidad-tipo">Categoría</label>
+                    <select id="habilidad-tipo" name="tipo">
+                        <option value="tecnologia">Tecnología</option>
+                        <option value="lenguaje">Lenguaje de programación</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="habilidad-item">Elemento del catálogo</label>
+                    <select id="habilidad-item" name="id" required>
+                        <option value="">Cargando catálogo...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="habilidad-nivel">Nivel de dominio</label>
+                    <select id="habilidad-nivel" name="nivel">
+                        <option value="básico">Básico</option>
+                        <option value="intermedio" selected>Intermedio</option>
+                        <option value="avanzado">Avanzado</option>
+                    </select>
+                </div>
+
+                <div class="skill-submit-wrap">
+                    <button class="btn-primary" type="submit" id="btn-agregar-habilidad">Agregar habilidad</button>
+                </div>
+            </form>
+
+            <p id="habilidad-message" class="status-message" role="status" aria-live="polite"></p>
+
+            <div class="skills-groups">
+                <div class="skill-group">
+                    <h4>Tecnologías</h4>
+                    <div id="lista-tecnologias" class="skills-list" aria-live="polite"></div>
+                </div>
+                <div class="skill-group">
+                    <h4>Lenguajes de programación</h4>
+                    <div id="lista-lenguajes" class="skills-list" aria-live="polite"></div>
+                </div>
+            </div>
+
+            <div class="form-actions" style="margin-top: 1.5rem;">
+                <a id="btn-ir-proyectos" href="/views/dashboard.html" class="btn-primary" hidden>Continuar a mis proyectos →</a>
+            </div>
+        </section>
+    </main>
+
+    <script src="../js/api-config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/perfil.js"></script>
+</body>
+</html>

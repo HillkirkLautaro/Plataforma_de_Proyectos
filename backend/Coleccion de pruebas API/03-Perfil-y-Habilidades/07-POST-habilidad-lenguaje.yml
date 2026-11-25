@@ -1,0 +1,32 @@
+info:
+  name: POST /portfolio/perfil/habilidades (lenguaje)
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/portfolio/perfil/habilidades"
+  body:
+    type: json
+    data: |-
+      {
+        "tipo": "lenguaje",
+        "id": {{langId}},
+        "nivel": "básico"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("Agrega lenguaje al perfil -> 201 Created", function () {
+          expect(res.getStatus()).to.equal(201);
+          expect(res.getBody().habilidad.tipo).to.equal("lenguaje");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

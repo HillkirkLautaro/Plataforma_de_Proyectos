@@ -1,0 +1,24 @@
+info:
+  name: GET /portfolio/proyectos/:id (eliminado -> 404)
+  type: http
+  seq: 8
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/portfolio/proyectos/{{projectId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("Confirma que el proyecto eliminado devuelve 404", function () {
+          expect(res.getStatus()).to.equal(404);
+          expect(res.getBody().error).to.be.a("string");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

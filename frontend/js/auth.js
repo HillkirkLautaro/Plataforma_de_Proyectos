@@ -10,9 +10,42 @@ function cerrarSesion() {
     window.location.href = '/index.html';
 }
 
+function mostrarMensajeAuth(texto, estado = '') {
+    const node = document.getElementById('auth-message');
+    if (!node) {
+        if (texto) alert(texto);
+        return;
+    }
+    node.textContent = texto;
+    if (estado) node.dataset.estado = estado;
+    else delete node.dataset.estado;
+}
+
+async function destinoSegunHabilidades(token) {
+    try {
+        const response = await fetch(`${API_BASE}/portfolio/perfil`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (response.status === 401) {
+            localStorage.removeItem('jwt_token');
+            localStorage.removeItem('usuario');
+            return null;
+        }
+        if (!response.ok) return '/views/perfil.html';
+        const perfil = await response.json();
+        const tieneHabilidades =
+            (Array.isArray(perfil.habilidades) && perfil.habilidades.length > 0) ||
+            (Array.isArray(perfil.lenguajes) && perfil.lenguajes.length > 0);
+        return tieneHabilidades ? '/views/dashboard.html' : '/views/perfil.html';
+    } catch (_) {
+        return '/views/perfil.html';
+    }
+}
+
 async function enviarFormularioAuth(formulario, endpoint, payload, registrar = false) {
     const boton = formulario.querySelector('button[type="submit"]');
     boton.disabled = true;
+    mostrarMensajeAuth('');
     try {
         const token = localStorage.getItem('jwt_token');
         const headers = { 'Content-Type': 'application/json' };
@@ -24,20 +57,27 @@ async function enviarFormularioAuth(formulario, endpoint, payload, registrar = f
         });
         const data = await response.json().catch(() => ({}));
         if (response.status === 409 && data.redirect) {
-            window.location.replace('/views/dashboard.html');
+            const destino = token ? (await destinoSegunHabilidades(token)) || '/views/dashboard.html' : '/views/dashboard.html';
+            window.location.replace(destino);
             return;
         }
         if (!response.ok) throw new Error(data.error || data.mensaje || 'No se pudo completar la solicitud');
         if (registrar) {
-            alert('Cuenta creada. Ya podés iniciar sesión.');
-            window.location.href = 'login.html';
+            if (data.token && data.usuario) {
+                guardarSesion(data.token, data.usuario);
+                mostrarMensajeAuth('¡Registro exitoso! Redirigiendo a tu perfil...', 'success');
+                setTimeout(() => window.location.replace('/views/perfil.html'), 600);
+                return;
+            }
+            mostrarMensajeAuth(data.mensaje || 'Cuenta creada. Por favor, inicia sesión.', 'success');
+            setTimeout(() => { window.location.href = 'login.html'; }, 1200);
             return;
         }
         guardarSesion(data.token, data.usuario);
-        window.location.href = '../index.html';
+        const destino = (await destinoSegunHabilidades(data.token)) || '/views/perfil.html';
+        window.location.replace(destino);
     } catch (error) {
-        alert(error.message);
-    } finally {
+        mostrarMensajeAuth(error.message, 'error');
         boton.disabled = false;
     }
 }
@@ -59,16 +99,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (authForm && existingToken) {
         const button = authForm.querySelector('button[type="submit"]');
         button.disabled = true;
-        fetch(`${API_BASE}/portfolio/perfil`, {
-            headers: { Authorization: `Bearer ${existingToken}` }
-        }).then(response => {
-            if (response.ok) {
-                window.location.replace('/views/dashboard.html');
+        destinoSegunHabilidades(existingToken).then(destino => {
+            if (destino) {
+                window.location.replace(destino);
                 return;
-            }
-            if (response.status === 401) {
-                localStorage.removeItem('jwt_token');
-                localStorage.removeItem('usuario');
             }
             button.disabled = false;
         }).catch(() => { button.disabled = false; });

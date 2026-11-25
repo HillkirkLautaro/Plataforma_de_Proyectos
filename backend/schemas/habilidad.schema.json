@@ -2,10 +2,14 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://portfolio.local/schemas/habilidad.schema.json",
   "title": "Habilidad de usuario",
-  "description": "Relación entre un usuario y una tecnología del catálogo externo.",
+  "description": "Relación entre un usuario y una tecnología o lenguaje del catálogo externo.",
   "type": "object",
   "properties": {
-    "tecnologia_id": {
+    "tipo": {
+      "type": "string",
+      "enum": ["tecnologia", "lenguaje"]
+    },
+    "id": {
       "type": "integer",
       "minimum": 1
     },
@@ -14,6 +18,6 @@
       "enum": ["básico", "intermedio", "avanzado"]
     }
   },
-  "required": ["tecnologia_id", "nivel"],
+  "required": ["tipo", "id", "nivel"],
   "additionalProperties": false
 }

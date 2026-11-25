@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portfolio.local/schemas/habilidad_actualizar.schema.json",
+  "title": "Actualizar nivel de habilidad",
+  "description": "Payload aceptado por PUT /api/portfolio/perfil/habilidades/<tipo>/<id>.",
+  "type": "object",
+  "properties": {
+    "nivel": {
+      "type": "string",
+      "enum": ["básico", "intermedio", "avanzado"]
+    }
+  },
+  "required": ["nivel"],
+  "additionalProperties": false
+}

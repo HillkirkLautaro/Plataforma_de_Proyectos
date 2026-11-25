@@ -1,12 +1,184 @@
-.public-portfolio { display: grid; gap: 2rem; }
-.profile-card, .public-project { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; }
-.profile-card h2 { font-size: 2rem; margin-bottom: .5rem; }
-.profile-card p, .public-project p { color: var(--text-secondary); }
-.portfolio-projects h2, .portfolio-skills h2 { margin-bottom: 1rem; }
-.project-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
-.public-project { display: grid; gap: .6rem; }
-.public-project h3 { color: var(--text-primary); }
-.project-meta { color: var(--text-secondary); font-size: .9rem; }
-.tag-list { display: flex; flex-wrap: wrap; gap: .6rem; }
-.tag { background: var(--bg-surface-hover); border: 1px solid var(--border-color); border-radius: 999px; padding: .3rem .75rem; color: var(--text-secondary); }
-.error-message { color: var(--danger); }
+/* ==========================================================================
+   1. Layout del Portafolio Público
+   ========================================================================== */
+.public-portfolio {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.925rem;
+    font-weight: 500;
+    width: fit-content;
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-surface);
+    transition: color var(--transition-fast), border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.back-link:hover {
+    color: var(--text-primary);
+    border-color: var(--primary);
+    background-color: var(--bg-surface-hover);
+}
+
+/* ==========================================================================
+   2. Tarjeta de Perfil
+   ========================================================================== */
+.profile-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-8);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.profile-card h2 {
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+}
+
+.profile-card p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    max-width: 72ch;
+}
+
+.profile-card p:first-of-type {
+    color: var(--primary);
+    font-family: var(--font-mono);
+    font-size: 0.925rem;
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   3. Secciones de Proyectos y Habilidades
+   ========================================================================== */
+.portfolio-projects h2,
+.portfolio-skills h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: var(--space-4);
+    color: var(--text-primary);
+}
+
+.project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--space-6);
+}
+
+.public-project {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.public-project:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary);
+}
+
+.public-project h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.015em;
+}
+
+.public-project p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.project-meta {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.project-meta:empty {
+    display: none;
+}
+
+/* Etiquetas y enlaces */
+.tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: auto;
+    padding-top: var(--space-2);
+}
+
+.tag {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--bg-surface-hover);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-full);
+    padding: 0.32rem 0.8rem;
+    font-size: 0.825rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+a.tag {
+    background-color: var(--primary-soft);
+    border-color: rgba(59, 130, 246, 0.35);
+    color: #93c5fd;
+}
+
+a.tag:hover {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: #ffffff;
+}
+
+.error-message {
+    color: var(--danger);
+    font-weight: 600;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-sm);
+    background-color: var(--danger-soft);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+/* ==========================================================================
+   4. Responsive
+   ========================================================================== */
+@media (max-width: 640px) {
+    .profile-card {
+        padding: var(--space-6);
+    }
+
+    .project-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-4);
+    }
+
+    .public-project {
+        padding: var(--space-5);
+    }
+}

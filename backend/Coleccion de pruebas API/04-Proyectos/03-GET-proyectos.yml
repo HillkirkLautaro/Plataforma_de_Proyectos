@@ -1,0 +1,27 @@
+info:
+  name: GET /portfolio/proyectos
+  type: http
+  seq: 3
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/portfolio/proyectos"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("Lista los proyectos del usuario -> 200 OK", function () {
+          expect(res.getStatus()).to.equal(200);
+          const lista = res.getBody();
+          expect(lista).to.be.an("array");
+          const existe = lista.some(p => Number(p.id) === Number(bru.getVar("projectId")));
+          expect(existe).to.equal(true);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

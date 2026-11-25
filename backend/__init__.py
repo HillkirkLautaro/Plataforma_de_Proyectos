@@ -5,6 +5,15 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, jsonify
 from flask_cors import CORS
+from werkzeug.exceptions import HTTPException
+
+
+DEFAULT_CORS_ORIGINS = [
+    "http://127.0.0.1:5500",
+    "http://localhost:5500",
+    "http://127.0.0.1:5000",
+    "http://localhost:5000",
+]
 
 
 def create_app():
@@ -26,9 +35,14 @@ def create_app():
         JWT_EXP_MINUTES=int(os.environ.get("JWT_EXP_MINUTES", "30")),
         MAX_CONTENT_LENGTH=16 * 1024,
     )
-    origins = [origin.strip() for origin in os.environ.get("CORS_ORIGINS", "").split(",") if origin.strip()]
-    # Permitir solicitudes cross-origin solo para los orígenes configurados explícitamente.
-    CORS(app, origins=origins, allow_headers=["Content-Type", "Authorization"])
+    raw_origins = os.environ.get("CORS_ORIGINS", "")
+    origins = [origin.strip() for origin in raw_origins.split(",") if origin.strip()] or DEFAULT_CORS_ORIGINS
+    CORS(
+        app,
+        resources={r"/*": {"origins": origins}},
+        allow_headers=["Content-Type", "Authorization"],
+        methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    )
 
     # Las rutas antiguas usan imports absolutos desde backend/.
     import sys
@@ -44,12 +58,50 @@ def create_app():
     app.register_blueprint(public_bp, url_prefix="/api")
     app.register_blueprint(portfolio_bp, url_prefix="/api/portfolio")
 
-    @app.errorhandler(413)
-    def request_too_large(_error):
-        return jsonify(error="El cuerpo de la solicitud excede el límite permitido"), 413
+    @app.errorhandler(400)
+    def bad_request(_error):
+        return jsonify(error="La solicitud enviada no es válida. Revisa los datos e intenta nuevamente."), 400
+
+    @app.errorhandler(401)
+    def unauthorized(_error):
+        return jsonify(error="Debes iniciar sesión para acceder a esta sección."), 401
+
+    @app.errorhandler(403)
+    def forbidden(_error):
+        return jsonify(error="No tienes permisos para realizar esta acción."), 403
 
     @app.errorhandler(404)
     def not_found(_error):
-        return jsonify(error="Ruta de API no encontrada"), 404
+        return jsonify(error="El recurso solicitado no existe."), 404
+
+    @app.errorhandler(405)
+    def method_not_allowed(_error):
+        return jsonify(error="La acción solicitada no está permitida para esta dirección."), 405
+
+    @app.errorhandler(413)
+    def request_too_large(_error):
+        return jsonify(error="Los datos enviados superan el tamaño máximo permitido."), 413
+
+    @app.errorhandler(429)
+    def too_many_requests(_error):
+        return jsonify(error="Has realizado demasiadas solicitudes. Espera unos minutos e intenta nuevamente."), 429
+
+    @app.errorhandler(500)
+    def internal_server_error(_error):
+        app.logger.exception("Error interno del servidor")
+        return jsonify(error="Ocurrió un error inesperado en el servidor. Intenta nuevamente en unos minutos."), 500
+
+    @app.errorhandler(HTTPException)
+    def handle_http_exception(error):
+        code = error.code or 500
+        if code >= 500:
+            app.logger.exception("Excepción HTTP %s no controlada", code)
+            return jsonify(error="Ocurrió un error inesperado en el servidor. Intenta nuevamente en unos minutos."), code
+        return jsonify(error="No se pudo procesar tu solicitud. Revisa los datos e intenta nuevamente."), code
+
+    @app.errorhandler(Exception)
+    def handle_unexpected_exception(_error):
+        app.logger.exception("Error inesperado no controlado")
+        return jsonify(error="Ocurrió un error inesperado en el servidor. Intenta nuevamente en unos minutos."), 500
 
     return app

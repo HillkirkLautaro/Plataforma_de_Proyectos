@@ -1,6 +1,6 @@
 """Entrada compatible para ejecutar el backend directamente."""
 
-from backend import create_app
+from __init__ import create_app
 
 app = create_app()
 

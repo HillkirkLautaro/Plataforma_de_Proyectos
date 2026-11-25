@@ -1,0 +1,7 @@
+info:
+  name: 05 - Público y Errores
+  type: folder
+  seq: 5
+
+request:
+  auth: none

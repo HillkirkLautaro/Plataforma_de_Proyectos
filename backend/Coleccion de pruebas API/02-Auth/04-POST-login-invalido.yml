@@ -1,0 +1,31 @@
+info:
+  name: POST /auth/login (credenciales inválidas -> 401)
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/auth/login"
+  body:
+    type: json
+    data: |-
+      {
+        "username": "{{testUsername}}",
+        "password": "PasswordIncorrecta999!"
+      }
+  auth: none
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("Rechaza credenciales incorrectas con 401", function () {
+          expect(res.getStatus()).to.equal(401);
+          expect(res.getBody().error).to.be.a("string");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -22,6 +22,15 @@ CREATE TABLE IF NOT EXISTS usuario_habilidades (
     UNIQUE KEY uk_usuario_tec (usuario_id, tecnologia_id)
 ) ENGINE=InnoDB;
 
+CREATE TABLE IF NOT EXISTS usuario_lenguajes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    lenguaje_id INT NOT NULL,
+    nivel ENUM('básico', 'intermedio', 'avanzado') NOT NULL,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    UNIQUE KEY uk_usuario_len (usuario_id, lenguaje_id)
+) ENGINE=InnoDB;
+
 CREATE TABLE IF NOT EXISTS proyectos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT NOT NULL,
@@ -60,4 +69,10 @@ CREATE TABLE IF NOT EXISTS proyecto_links (
     tipo VARCHAR(50) NOT NULL,
     url VARCHAR(255) NOT NULL,
     FOREIGN KEY (proyecto_id) REFERENCES proyectos(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS api_profesor_backup (
+    recurso VARCHAR(100) PRIMARY KEY,
+    datos JSON NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;

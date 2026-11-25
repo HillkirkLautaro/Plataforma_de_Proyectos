@@ -1,64 +1,116 @@
-#vista-publica h2 {
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-    letter-spacing: -0.03em;
+/* ==========================================================================
+   1. Encabezado del Directorio Público
+   ========================================================================== */
+.section-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-bottom: var(--space-6);
 }
 
+#vista-publica h2 {
+    font-size: clamp(1.65rem, 3vw, 2.25rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+}
+
+.section-subtitle {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    max-width: 60ch;
+}
+
+/* ==========================================================================
+   2. Grilla de Desarrolladores
+   ========================================================================== */
 .grid-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 1.5rem;
-    margin-top: 2rem;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--space-6);
+    margin-top: var(--space-6);
 }
 
+/* ==========================================================================
+   3. Tarjetas de Desarrolladores
+   ========================================================================== */
 .card {
-    background: var(--bg-surface);
+    background-color: var(--bg-surface);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
-    padding: 1.75rem;
-    box-shadow: var(--shadow);
-    transition: transform 0.2s ease, border-color 0.2s ease;
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    gap: var(--space-5);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .card:hover {
     transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
     border-color: var(--primary);
 }
 
 .card h3 {
     font-size: 1.25rem;
-    color: #fff;
-    margin-bottom: 0.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--space-2);
+    letter-spacing: -0.02em;
 }
 
 .card p {
     color: var(--text-secondary);
     font-size: 0.95rem;
-    margin-bottom: 1rem;
+    margin-bottom: var(--space-3);
+}
+
+.card p:last-child {
+    margin-bottom: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--info);
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.7rem;
+    border-radius: var(--radius-full);
+    background-color: var(--info-soft);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+.card .portfolio-link {
+    width: 100%;
+    text-align: center;
 }
 
 .card-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: var(--space-2);
     margin-top: auto;
 }
 
 .card-tag {
-    background: var(--bg-surface-hover);
+    background-color: var(--bg-surface-hover);
     color: var(--text-secondary);
     font-size: 0.75rem;
-    padding: 0.25rem 0.6rem;
-    border-radius: 9999px;
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-full);
     border: 1px solid var(--border-color);
 }
 
+/* ==========================================================================
+   4. Responsive
+   ========================================================================== */
 @media (max-width: 640px) {
     .grid-cards {
         grid-template-columns: 1fr;
+        gap: var(--space-4);
+    }
+
+    .card {
+        padding: var(--space-5);
     }
 }

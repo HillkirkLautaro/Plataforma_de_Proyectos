@@ -1,135 +1,71 @@
-import os
-import requests
 from dotenv import load_dotenv
-from cachetools import TTLCache
 from flask import Blueprint, jsonify, request
-from werkzeug.exceptions import BadGateway, GatewayTimeout, InternalServerError, Unauthorized, TooManyRequests
+from werkzeug.exceptions import (
+    BadGateway,
+    GatewayTimeout,
+    InternalServerError,
+    TooManyRequests,
+    Unauthorized,
+)
+
+from services.catalog_service import extraer_lista_catalogo, obtener_catalogo
 
 load_dotenv()
 
-catalog_bp = Blueprint('catalog_bp', __name__)
-
-cache = TTLCache(maxsize=10, ttl=3600)
-
-def _obtener_datos_profesor(recurso: str):
-    """Consulta la API del docente incluyendo el encabezado de autenticación."""
-    profesor_url = os.environ.get('PROFESOR_API_URL')
-    access_key = os.environ.get('GRUPO_ACCESS_KEY')
-
-    if not profesor_url:
-        raise InternalServerError(description="La variable de entorno PROFESOR_API_URL no está configurada.")
-    
-    if not access_key:
-        raise InternalServerError(description="La variable de entorno GRUPO_ACCESS_KEY no está configurada.")
-
-    # Encabezados enviados hacia el servicio externo
-    headers = {
-        'Grupo-Access-Key': access_key,
-        'Content-Type': 'application/json'
-    }
-
-    url = f"{profesor_url.rstrip('/')}/{recurso}"
-    try:
-        resp = requests.get(url, headers=headers, timeout=5)
-
-        if resp.status_code == 200:
-            datos = resp.json()
-            cache[recurso] = datos  # Guardar en caché solo si la respuesta fue exitosa
-            return datos, 200
-
-        if resp.status_code == 401:
-            raise Unauthorized(description="Grupo-Access-Key no autorizada o vencida.")
-        if resp.status_code == 429:
-            raise TooManyRequests(description="La API del profesor limitó las solicitudes.")
-        raise BadGateway(description=f"La API del profesor respondió HTTP {resp.status_code}.")
-    except (Unauthorized, TooManyRequests):
-        raise
-    except requests.exceptions.Timeout:
-        raise GatewayTimeout(description="Tiempo de espera agotado al conectar con el servicio externo.")
-    except requests.exceptions.RequestException:
-        raise BadGateway(description="Error de comunicación con el servicio externo.")
+catalog_bp = Blueprint("catalog_bp", __name__)
 
 
-@catalog_bp.route('/lenguajes', methods=['GET'])
+def _filtrar_por_nombre(datos, recurso: str, nombre_filtro: str):
+    if not nombre_filtro:
+        return datos
+    lista = extraer_lista_catalogo(datos, recurso)
+    return [
+        item for item in lista
+        if isinstance(item, dict) and nombre_filtro in str(item.get("nombre", "")).lower()
+    ]
+
+
+@catalog_bp.route("/lenguajes", methods=["GET"])
 def get_lenguajes():
     try:
-        # 1. Capturamos el parámetro ?nombre=... de la URL (si no viene, será None)
-        nombre_filtro = request.args.get('nombre', '').strip().lower()
-        
-        # 2. Obtenemos los datos (o puedes pasarle el parámetro si la API del profesor lo soporta)
-        datos, status = _obtener_datos_profesor('lenguajes')
-        
-        # 3. Si enviaron un nombre en la URL y la respuesta fue exitosa, filtramos la lista
-        if nombre_filtro and status == 200 and isinstance(datos, list):
-            datos = [
-                item for item in datos
-                if nombre_filtro in item.get('nombre', '').lower()
-            ]
-            
-        return jsonify(datos), status
+        nombre_filtro = request.args.get("nombre", "").strip().lower()
+        datos = obtener_catalogo("lenguajes")
+        return jsonify(_filtrar_por_nombre(datos, "lenguajes", nombre_filtro)), 200
     except (BadGateway, GatewayTimeout, Unauthorized, TooManyRequests, InternalServerError) as exc:
         return jsonify(error=exc.description), exc.code
 
-@catalog_bp.route('/lenguajes/<int:lenguaje_id>', methods=['GET'])
+
+@catalog_bp.route("/lenguajes/<int:lenguaje_id>", methods=["GET"])
 def get_lenguaje_por_id(lenguaje_id):
     try:
-        datos, status = _obtener_datos_profesor('lenguajes')
-        
-        if status == 200:
-            # Obtenemos la lista (ya sea directa o dentro de una clave del diccionario)
-            lista = datos if isinstance(datos, list) else next((v for v in datos.values() if isinstance(v, list)), [])
-            
-            # Buscamos el elemento que coincida con el ID
-            encontrado = next((item for item in lista if item.get('id') == lenguaje_id), None)
-            
-            if encontrado:
-                return jsonify(encontrado), 200
-            else:
-                return jsonify({"error": "Lenguaje no encontrada"}), 404
-                
-        return jsonify(datos), status
+        datos = obtener_catalogo("lenguajes")
+        lista = extraer_lista_catalogo(datos, "lenguajes")
+        encontrado = next((item for item in lista if isinstance(item, dict) and item.get("id") == lenguaje_id), None)
+        if encontrado:
+            return jsonify(encontrado), 200
+        return jsonify({"error": "No encontramos el lenguaje solicitado."}), 404
     except (BadGateway, GatewayTimeout, Unauthorized, TooManyRequests, InternalServerError) as exc:
         return jsonify(error=exc.description), exc.code
 
-@catalog_bp.route('/tecnologias', methods=['GET'])
+
+@catalog_bp.route("/tecnologias", methods=["GET"])
 def get_tecnologias():
     try:
-        # 1. Capturamos el parámetro ?nombre=... de la URL (si no viene, será None)
-        nombre_filtro = request.args.get('nombre', '').strip().lower()
-        
-        # 2. Obtenemos los datos (o puedes pasarle el parámetro si la API del profesor lo soporta)
-        datos, status = _obtener_datos_profesor('tecnologias')
-        
-        # 3. Si enviaron un nombre en la URL y la respuesta fue exitosa, filtramos la lista
-        if nombre_filtro and status == 200 and isinstance(datos, list):
-            datos = [
-                item for item in datos
-                if nombre_filtro in item.get('nombre', '').lower()
-            ]
-            
-        return jsonify(datos), status
+        nombre_filtro = request.args.get("nombre", "").strip().lower()
+        datos = obtener_catalogo("tecnologias")
+        return jsonify(_filtrar_por_nombre(datos, "tecnologias", nombre_filtro)), 200
     except (BadGateway, GatewayTimeout, Unauthorized, TooManyRequests, InternalServerError) as exc:
         return jsonify(error=exc.description), exc.code
 
-@catalog_bp.route('/tecnologias/<int:tecnologia_id>', methods=['GET'])
+
+@catalog_bp.route("/tecnologias/<int:tecnologia_id>", methods=["GET"])
 def get_tecnologia_por_id(tecnologia_id):
     try:
-        datos, status = _obtener_datos_profesor('tecnologias')
-        
-        if status == 200:
-            # Obtenemos la lista (ya sea directa o dentro de una clave del diccionario)
-            lista = datos if isinstance(datos, list) else next((v for v in datos.values() if isinstance(v, list)), [])
-            
-            # Buscamos el elemento que coincida con el ID
-            encontrado = next((item for item in lista if item.get('id') == tecnologia_id), None)
-            
-            if encontrado:
-                return jsonify(encontrado), 200
-            else:
-                return jsonify({"error": "Tecnología no encontrada"}), 404
-                
-        return jsonify(datos), status
+        datos = obtener_catalogo("tecnologias")
+        lista = extraer_lista_catalogo(datos, "tecnologias")
+        encontrado = next((item for item in lista if isinstance(item, dict) and item.get("id") == tecnologia_id), None)
+        if encontrado:
+            return jsonify(encontrado), 200
+        return jsonify({"error": "No encontramos la tecnología solicitada."}), 404
     except (BadGateway, GatewayTimeout, Unauthorized, TooManyRequests, InternalServerError) as exc:
         return jsonify(error=exc.description), exc.code
-
-

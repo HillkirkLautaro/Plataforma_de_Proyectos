@@ -1,0 +1,30 @@
+info:
+  name: PATCH /portfolio/proyectos/:id (parcial)
+  type: http
+  seq: 5
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/portfolio/proyectos/{{projectId}}"
+  body:
+    type: json
+    data: |-
+      {
+        "etapa": "testing"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("Actualiza parcialmente la etapa con PATCH -> 200 OK", function () {
+          expect(res.getStatus()).to.equal(200);
+          expect(res.getBody().proyecto.etapa).to.equal("testing");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

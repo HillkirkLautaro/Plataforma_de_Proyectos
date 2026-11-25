@@ -38,10 +38,13 @@
     },
     "tecnologias": {
       "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
       "items": {"$ref": "#/$defs/referenciaCatalogo"}
     },
     "lenguajes": {
       "type": "array",
+      "minItems": 1,
       "items": {"$ref": "#/$defs/referenciaCatalogo"}
     },
     "links": {

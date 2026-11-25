@@ -1,0 +1,28 @@
+info:
+  name: GET /portafolio/:usuario_id
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/portafolio/{{userId}}"
+  auth: none
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("Devuelve 200 OK con portafolio público del usuario", function () {
+          expect(res.getStatus()).to.equal(200);
+          const body = res.getBody();
+          expect(Number(body.perfil.id)).to.equal(Number(bru.getVar("userId")));
+          expect(body.habilidades).to.be.an("array");
+          expect(body.lenguajes).to.be.an("array");
+          expect(body.proyectos).to.be.an("array");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

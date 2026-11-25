@@ -1,0 +1,46 @@
+info:
+  name: PUT /portfolio/proyectos/:id (reemplazo completo)
+  type: http
+  seq: 6
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/api/portfolio/proyectos/{{projectId}}"
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "Proyecto Bruno Finalizado",
+        "descripcion": "Actualizado por completo con PUT.",
+        "etapa": "producción",
+        "fecha_inicio": "2025-06-01",
+        "fecha_fin": "2025-11-01",
+        "deadline": "2026-12-01",
+        "tecnologias": [
+          { "id": {{techId}}, "nivel": "avanzado" }
+        ],
+        "lenguajes": [
+          { "id": {{langId}}, "nivel": "avanzado" }
+        ],
+        "links": [
+          { "tipo": "demo", "url": "https://demo.ejemplo.com" }
+        ]
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("Reemplaza el proyecto completo con PUT -> 200 OK", function () {
+          expect(res.getStatus()).to.equal(200);
+          const body = res.getBody();
+          expect(body.proyecto.nombre).to.equal("Proyecto Bruno Finalizado");
+          expect(body.proyecto.etapa).to.equal("producción");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

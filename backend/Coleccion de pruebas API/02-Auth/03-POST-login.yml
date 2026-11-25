@@ -1,0 +1,34 @@
+info:
+  name: POST /auth/login
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/auth/login"
+  body:
+    type: json
+    data: |-
+      {
+        "username": "{{testUsername}}",
+        "password": "{{testPassword}}"
+      }
+  auth: none
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("Inicia sesión y devuelve 200 con token JWT", function () {
+          expect(res.getStatus()).to.equal(200);
+          const body = res.getBody();
+          expect(body.token).to.be.a("string");
+          expect(body.usuario.username).to.equal(bru.getVar("testUsername"));
+          bru.setVar("token", body.token);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

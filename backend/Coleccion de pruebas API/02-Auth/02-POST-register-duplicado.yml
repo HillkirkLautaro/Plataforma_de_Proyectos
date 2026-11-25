@@ -1,0 +1,32 @@
+info:
+  name: POST /auth/register (duplicado -> 409)
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/auth/register"
+  body:
+    type: json
+    data: |-
+      {
+        "username": "{{testUsername}}",
+        "email": "{{testEmail}}",
+        "password": "{{testPassword}}"
+      }
+  auth: none
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("Rechaza registro duplicado con 409 Conflict", function () {
+          expect(res.getStatus()).to.equal(409);
+          expect(res.getBody().error).to.be.a("string");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

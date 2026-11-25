@@ -1,0 +1,24 @@
+info:
+  name: DELETE /portfolio/proyectos/:id
+  type: http
+  seq: 7
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/portfolio/proyectos/{{projectId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("Elimina el proyecto -> 200 OK", function () {
+          expect(res.getStatus()).to.equal(200);
+          expect(res.getBody().mensaje).to.be.a("string");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

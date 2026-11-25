@@ -1,0 +1,9 @@
+info:
+  name: 03 - Perfil y Habilidades
+  type: folder
+  seq: 3
+
+request:
+  auth:
+    type: bearer
+    token: "{{token}}"

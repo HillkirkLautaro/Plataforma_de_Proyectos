@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portfolio.local/schemas/perfil_reemplazar.schema.json",
+  "title": "Reemplazar perfil de usuario",
+  "description": "Datos completos requeridos por PUT /api/portfolio/perfil.",
+  "type": "object",
+  "properties": {
+    "nombre_completo": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "bio": {
+      "type": "string",
+      "maxLength": 10000
+    }
+  },
+  "required": ["nombre_completo", "bio"],
+  "additionalProperties": false
+}

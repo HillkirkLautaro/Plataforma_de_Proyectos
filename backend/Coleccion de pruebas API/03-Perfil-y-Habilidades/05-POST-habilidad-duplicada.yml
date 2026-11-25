@@ -1,0 +1,32 @@
+info:
+  name: POST /portfolio/perfil/habilidades (duplicada -> 409)
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/portfolio/perfil/habilidades"
+  body:
+    type: json
+    data: |-
+      {
+        "tipo": "tecnologia",
+        "id": {{techId}},
+        "nivel": "avanzado"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("Rechaza habilidad duplicada con 409 Conflict", function () {
+          expect(res.getStatus()).to.equal(409);
+          expect(res.getBody().error).to.be.a("string");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

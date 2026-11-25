@@ -1,32 +1,403 @@
-.dashboard { display: grid; gap: 2rem; }
-.welcome, .panel-card, .project-card { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; }
-.welcome h2, .dashboard section > h2 { margin-bottom: .4rem; }
-.eyebrow { color: var(--primary); font-size: .75rem; font-weight: 700; letter-spacing: .12em; }
-.panel-card { max-width: 760px; }
-#project-form { display: grid; gap: 1rem; margin-top: 1rem; }
-#project-form label { display: grid; gap: .35rem; color: var(--text-secondary); }
-#project-form input, #project-form textarea, #project-form select { width: 100%; padding: .7rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-main); color: var(--text-primary); font: inherit; }
-.catalog-selector { display: grid; gap: .75rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 1rem; min-width: 0; }
-.catalog-selector legend { padding: 0 .4rem; color: var(--text-primary); font-weight: 700; }
-.catalog-search-label { display: grid; gap: .35rem; color: var(--text-secondary); }
-.catalog-hint, .selection-count { color: var(--text-secondary); font-size: .875rem; }
-.catalog-options { display: grid; gap: .6rem; max-height: 20rem; overflow-y: auto; }
-.catalog-option { display: grid; grid-template-columns: auto minmax(0, 1fr) minmax(150px, .5fr); align-items: center; gap: .75rem; padding: .65rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-main); }
-.catalog-option:has(input:checked) { border-color: var(--primary); background: var(--bg-surface-hover); }
-.catalog-option input[type="checkbox"] { width: 1.1rem !important; height: 1.1rem; accent-color: var(--primary); }
-.catalog-option-name { color: var(--text-primary); overflow-wrap: anywhere; }
-.catalog-option select { padding: .45rem !important; }
-.catalog-empty { color: var(--text-secondary); padding: .5rem; }
-.project-links { display: grid; gap: .75rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 1rem; }
-.project-links legend { padding: 0 .4rem; color: var(--text-primary); }
-.date-fields { display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem; }
-.project-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-top: 1rem; }
-.project-card { display: grid; gap: .5rem; }
-.project-links-list { display: flex; flex-wrap: wrap; gap: .75rem; }
-.project-links-list a { color: var(--primary); }
-.project-card p { color: var(--text-secondary); white-space: pre-wrap; }
-.project-card button, #logout { justify-self: start; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: transparent; color: var(--text-primary); cursor: pointer; padding: .5rem .8rem; }
-.project-card button:hover, #logout:hover { border-color: var(--danger); color: var(--danger); }
-#form-message { min-height: 1.5rem; color: var(--text-secondary); }
-@media (max-width: 640px) { .date-fields { grid-template-columns: 1fr; } }
-@media (max-width: 520px) { .catalog-option { grid-template-columns: auto minmax(0, 1fr); } .catalog-option select { grid-column: 1 / -1; } }
+/* ==========================================================================
+   1. Layout del Panel Privado
+   ========================================================================== */
+.dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+}
+
+.welcome,
+.panel-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+}
+
+.welcome {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    background-image: linear-gradient(135deg, rgba(59, 130, 246, 0.1), transparent 60%);
+}
+
+.welcome h2 {
+    font-size: clamp(1.5rem, 2.8vw, 2rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+}
+
+.welcome p {
+    color: var(--text-secondary);
+}
+
+.eyebrow {
+    color: var(--primary);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.dashboard section > h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: var(--space-4);
+}
+
+/* ==========================================================================
+   2. Formulario de Proyectos
+   ========================================================================== */
+.panel-card {
+    width: 100%;
+    max-width: 860px;
+}
+
+#project-form {
+    display: grid;
+    gap: var(--space-5);
+    margin-top: var(--space-4);
+}
+
+#project-form label {
+    display: grid;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+#project-form input:not([type="checkbox"]),
+#project-form textarea,
+#project-form select {
+    width: 100%;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background-color: var(--bg-input);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.95rem;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+#project-form textarea {
+    resize: vertical;
+    min-height: 92px;
+}
+
+#project-form input:not([type="checkbox"]):hover,
+#project-form textarea:hover,
+#project-form select:hover {
+    border-color: var(--border-strong);
+}
+
+#project-form input:not([type="checkbox"]):focus-visible,
+#project-form textarea:focus-visible,
+#project-form select:focus-visible {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: var(--shadow-focus);
+}
+
+.date-fields {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-4);
+}
+
+/* Selectores de catálogo (tecnologías y lenguajes) */
+.catalog-selector,
+.project-links {
+    display: grid;
+    gap: var(--space-3);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-5);
+    background-color: rgba(11, 17, 32, 0.45);
+    min-width: 0;
+}
+
+.catalog-selector legend,
+.project-links legend {
+    padding: 0 var(--space-2);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.catalog-hint,
+.selection-count {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.selection-count {
+    font-weight: 600;
+    color: var(--info);
+}
+
+.catalog-options {
+    display: grid;
+    gap: var(--space-2);
+    max-height: 18rem;
+    overflow-y: auto;
+    padding-right: var(--space-1);
+}
+
+.catalog-option {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) minmax(145px, 0.45fr);
+    align-items: center;
+    gap: var(--space-3);
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background-color: var(--bg-input);
+    transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.catalog-option:hover {
+    border-color: var(--border-strong);
+}
+
+.catalog-option.is-selected,
+.catalog-option:has(input:checked) {
+    border-color: var(--primary);
+    background-color: var(--primary-soft);
+}
+
+.catalog-option input[type="checkbox"] {
+    width: 1.15rem;
+    height: 1.15rem;
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+
+.catalog-option-name {
+    color: var(--text-primary);
+    font-weight: 500;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+}
+
+.catalog-option select {
+    padding: 0.45rem 0.65rem;
+    font-size: 0.875rem;
+}
+
+.catalog-option select:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.catalog-empty {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    padding: var(--space-2);
+}
+
+/* Acciones y estado del formulario */
+.form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+#cancel-edit {
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 0.6rem 1.15rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-strong);
+    background-color: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: color var(--transition-fast), border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+#cancel-edit:hover {
+    color: var(--text-primary);
+    border-color: var(--text-secondary);
+    background-color: var(--bg-surface-hover);
+}
+
+#form-message {
+    min-height: 1.5rem;
+    font-size: 0.925rem;
+    font-weight: 600;
+    color: var(--info);
+}
+
+#form-message[data-estado="error"] {
+    color: var(--danger);
+    padding: 0.65rem 0.9rem;
+    border-radius: var(--radius-sm);
+    background-color: var(--danger-soft);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+#form-message[data-estado="success"] {
+    color: var(--success);
+    padding: 0.65rem 0.9rem;
+    border-radius: var(--radius-sm);
+    background-color: var(--success-soft);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+#form-message:empty {
+    min-height: 0;
+    padding: 0;
+    border: none;
+    background: none;
+}
+
+/* ==========================================================================
+   3. Grilla y Tarjetas de Mis Proyectos
+   ========================================================================== */
+.project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--space-6);
+    margin-top: var(--space-4);
+}
+
+.project-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.project-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary);
+}
+
+.project-card h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.project-card p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    white-space: pre-wrap;
+}
+
+.project-card small {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.project-links-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.project-links-list:empty {
+    display: none;
+}
+
+.project-links-list a {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.825rem;
+    font-weight: 600;
+    color: #93c5fd;
+    text-decoration: none;
+    padding: 0.28rem 0.7rem;
+    border-radius: var(--radius-full);
+    background-color: var(--primary-soft);
+    border: 1px solid rgba(59, 130, 246, 0.35);
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.project-links-list a:hover {
+    background-color: var(--primary);
+    color: #ffffff;
+}
+
+.project-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: auto;
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--border-color);
+}
+
+.project-card button {
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background-color: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 0.45rem 0.9rem;
+    transition: border-color var(--transition-fast), color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.project-card .btn-edit:hover {
+    border-color: var(--primary);
+    color: #93c5fd;
+    background-color: var(--primary-soft);
+}
+
+.project-card .btn-delete:hover {
+    border-color: var(--danger);
+    color: var(--danger);
+    background-color: var(--danger-soft);
+}
+
+/* ==========================================================================
+   4. Responsive
+   ========================================================================== */
+@media (max-width: 768px) {
+    .welcome,
+    .panel-card {
+        padding: var(--space-5);
+    }
+
+    .date-fields {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .project-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-4);
+    }
+
+    .catalog-selector,
+    .project-links {
+        padding: var(--space-4);
+    }
+}
+
+@media (max-width: 520px) {
+    .catalog-option {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .catalog-option select {
+        grid-column: 1 / -1;
+    }
+}

@@ -2,6 +2,91 @@ const token = localStorage.getItem('jwt_token');
 let editingProjectId = null;
 const catalogSelections = { tecnologias: new Map(), lenguajes: new Map() };
 const catalogData = { tecnologias: [], lenguajes: [] };
+const FECHA_MINIMA_PROYECTO = '1990-01-01';
+const ETAPAS_SIN_FECHA_FIN = new Set(['formulación', 'modelado']);
+
+function obtenerFechaMaximaProyecto() {
+    const hoy = new Date();
+    const anio = hoy.getFullYear() + 10;
+    const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+    const diaMaxMes = new Date(anio, hoy.getMonth() + 1, 0).getDate();
+    const dia = String(Math.min(hoy.getDate(), diaMaxMes)).padStart(2, '0');
+    return `${anio}-${mes}-${dia}`;
+}
+
+function normalizarFechaInput(valor) {
+    if (!valor) return '';
+    if (typeof valor === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(valor)) return valor;
+    const parsed = new Date(valor);
+    if (Number.isNaN(parsed.getTime())) return '';
+    return parsed.toISOString().slice(0, 10);
+}
+
+function sincronizarLimitesFechas(form) {
+    const fechaMax = obtenerFechaMaximaProyecto();
+    const inicioInput = form.elements.fecha_inicio;
+    const finInput = form.elements.fecha_fin;
+    const deadlineInput = form.elements.deadline;
+
+    for (const input of [inicioInput, finInput, deadlineInput]) {
+        input.min = FECHA_MINIMA_PROYECTO;
+        input.max = fechaMax;
+    }
+
+    const minRelativo = inicioInput.value && inicioInput.value >= FECHA_MINIMA_PROYECTO
+        ? inicioInput.value
+        : FECHA_MINIMA_PROYECTO;
+    finInput.min = minRelativo;
+    deadlineInput.min = minRelativo;
+}
+
+function mostrarMensajeFormulario(texto, estado = '') {
+    const message = document.getElementById('form-message');
+    message.textContent = texto;
+    if (estado) message.dataset.estado = estado;
+    else delete message.dataset.estado;
+}
+
+function validarFormularioProyecto(data) {
+    if (!data.tecnologias.length && !data.lenguajes.length) {
+        return 'El proyecto debe incluir al menos una tecnología y un lenguaje de programación.';
+    }
+    if (!data.tecnologias.length) {
+        return 'Debes seleccionar al menos una tecnología para el proyecto.';
+    }
+    if (!data.lenguajes.length) {
+        return 'Debes seleccionar al menos un lenguaje de programación para el proyecto.';
+    }
+
+    const fechaMax = obtenerFechaMaximaProyecto();
+    const camposFecha = [
+        ['fecha_inicio', 'fecha de inicio'],
+        ['fecha_fin', 'fecha de finalización'],
+        ['deadline', 'fecha límite'],
+    ];
+
+    for (const [clave, etiqueta] of camposFecha) {
+        const valor = data[clave];
+        if (!valor) continue;
+        if (valor < FECHA_MINIMA_PROYECTO) {
+            return `La ${etiqueta} no puede ser anterior al 1 de enero de 1990.`;
+        }
+        if (valor > fechaMax) {
+            return `La ${etiqueta} no puede superar los 10 años a partir de hoy (${fechaMax}).`;
+        }
+    }
+
+    if (data.fecha_inicio && data.fecha_fin && data.fecha_fin < data.fecha_inicio) {
+        return 'La fecha de finalización no puede ser anterior a la fecha de inicio.';
+    }
+    if (data.fecha_inicio && data.deadline && data.deadline < data.fecha_inicio) {
+        return 'La fecha límite no puede ser anterior a la fecha de inicio.';
+    }
+    if (ETAPAS_SIN_FECHA_FIN.has(data.etapa) && data.fecha_fin) {
+        return 'No puedes asignar una fecha de finalización mientras el proyecto está en etapa de formulación o modelado.';
+    }
+    return null;
+}
 
 function authHeaders() { return { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }; }
 async function apiRequest(path, options = {}) {
@@ -77,9 +162,10 @@ function renderCatalogo(type) {
 
 function actualizarContador(type) {
     const count = catalogSelections[type].size;
+    const vacio = type === 'tecnologias' ? 'Ninguna seleccionada (obligatorio)' : 'Ninguno seleccionado (obligatorio)';
     document.getElementById(`${type}-count`).textContent = count
         ? `${count} ${count === 1 ? 'opción seleccionada' : 'opciones seleccionadas'}`
-        : 'Ninguna seleccionada';
+        : vacio;
 }
 
 function relacionesSeleccionadas(type) {
@@ -111,7 +197,10 @@ function mostrarProyectos(projects) {
         const card = document.createElement('article');
         card.className = 'project-card';
         const title = document.createElement('h3'); title.textContent = project.nombre;
-        const stage = document.createElement('strong'); stage.textContent = project.etapa;
+        const stage = document.createElement('strong');
+        stage.className = 'stage-badge';
+        stage.dataset.etapa = project.etapa;
+        stage.textContent = project.etapa;
         const description = document.createElement('p'); description.textContent = project.descripcion || 'Sin descripción';
         const tech = document.createElement('small');
         tech.textContent = `Tecnologías: ${nombreYNivel(project.tecnologias, catalogData.tecnologias)} · Lenguajes: ${nombreYNivel(project.lenguajes, catalogData.lenguajes)}`;
@@ -129,15 +218,18 @@ function mostrarProyectos(projects) {
                 links.append(anchor);
             } catch (_) { /* Ignora URLs antiguas malformadas guardadas antes de validar. */ }
         });
-        const remove = document.createElement('button'); remove.type = 'button'; remove.textContent = 'Eliminar';
-        const edit = document.createElement('button'); edit.type = 'button'; edit.textContent = 'Editar';
+        const actions = document.createElement('div');
+        actions.className = 'project-actions';
+        const edit = document.createElement('button'); edit.type = 'button'; edit.className = 'btn-edit'; edit.textContent = 'Editar';
+        const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'btn-delete'; remove.textContent = 'Eliminar';
         edit.addEventListener('click', () => iniciarEdicion(project));
         remove.addEventListener('click', async () => {
             if (!confirm(`¿Eliminar «${project.nombre}»?`)) return;
             try { await apiRequest(`/portfolio/proyectos/${project.id}`, { method: 'DELETE' }); await cargarProyectos(); }
             catch (error) { alert(error.message); }
         });
-        card.append(title, stage, description, tech, links, edit, remove);
+        actions.append(edit, remove);
+        card.append(title, stage, description, tech, links, actions);
         list.append(card);
     });
 }
@@ -151,8 +243,9 @@ function iniciarEdicion(project) {
     form.elements.descripcion.value = project.descripcion || '';
     form.elements.etapa.value = project.etapa || 'formulación';
     for (const field of ['fecha_inicio', 'fecha_fin', 'deadline']) {
-        form.elements[field].value = project[field] || '';
+        form.elements[field].value = normalizarFechaInput(project[field]);
     }
+    sincronizarLimitesFechas(form);
     for (const [field, relations] of [['tecnologias', project.tecnologias], ['lenguajes', project.lenguajes]]) {
         catalogSelections[field].clear();
         (Array.isArray(relations) ? relations : []).forEach(item => {
@@ -168,24 +261,30 @@ function iniciarEdicion(project) {
     }
     form.querySelector('button[type="submit"]').textContent = 'Guardar cambios';
     document.getElementById('cancel-edit').hidden = false;
-    document.getElementById('form-message').textContent = `Editando: ${project.nombre}`;
+    mostrarMensajeFormulario(`Editando: ${project.nombre}`);
     form.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function cancelarEdicion() {
     editingProjectId = null;
-    document.getElementById('project-form').reset();
+    const form = document.getElementById('project-form');
+    form.reset();
+    sincronizarLimitesFechas(form);
     for (const type of ['tecnologias', 'lenguajes']) {
         catalogSelections[type].clear();
         renderCatalogo(type);
     }
     document.querySelector('#project-form button[type="submit"]').textContent = 'Guardar proyecto';
     document.getElementById('cancel-edit').hidden = true;
-    document.getElementById('form-message').textContent = '';
+    mostrarMensajeFormulario('');
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
     if (!token) { window.location.replace('/views/login.html'); return; }
+    const projectForm = document.getElementById('project-form');
+    sincronizarLimitesFechas(projectForm);
+    projectForm.elements.fecha_inicio.addEventListener('change', () => sincronizarLimitesFechas(projectForm));
+    projectForm.elements.fecha_inicio.addEventListener('input', () => sincronizarLimitesFechas(projectForm));
     document.getElementById('logout').addEventListener('click', cerrarSesion);
     document.getElementById('cancel-edit').addEventListener('click', cancelarEdicion);
     for (const type of ['tecnologias', 'lenguajes']) {
@@ -196,16 +295,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             cargarOpcionesCatalogo('tecnologias'), cargarOpcionesCatalogo('lenguajes')
         ]);
         const catalogError = catalogResults.find(result => result.status === 'rejected');
-        if (catalogError) document.getElementById('form-message').textContent =
-            `No se pudieron cargar todos los catálogos: ${catalogError.reason.message}`;
+        if (catalogError) mostrarMensajeFormulario(
+            `No se pudieron cargar todos los catálogos: ${catalogError.reason.message}`,
+            'error'
+        );
         await cargarPerfil();
         await cargarProyectos();
     } catch (error) { document.getElementById('project-list').textContent = error.message; }
 
-    document.getElementById('project-form').addEventListener('submit', async event => {
+    projectForm.addEventListener('submit', async event => {
         event.preventDefault();
         const form = event.currentTarget;
-        const message = document.getElementById('form-message');
         const data = Object.fromEntries(new FormData(form));
         try {
             data.tecnologias = relacionesSeleccionadas('tecnologias');
@@ -215,12 +315,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .filter(link => link.url);
             for (const type of ['demo', 'github', 'gitlab']) delete data[`link_${type}`];
             for (const field of ['fecha_inicio', 'fecha_fin', 'deadline']) if (!data[field]) data[field] = null;
+
+            const errorValidacion = validarFormularioProyecto(data);
+            if (errorValidacion) {
+                mostrarMensajeFormulario(errorValidacion, 'error');
+                return;
+            }
+
             const wasEditing = Boolean(editingProjectId);
             const method = wasEditing ? 'PUT' : 'POST';
             const path = wasEditing ? `/portfolio/proyectos/${editingProjectId}` : '/portfolio/proyectos';
             await apiRequest(path, { method, body: JSON.stringify(data) });
-            cancelarEdicion(); message.textContent = wasEditing ? 'Proyecto actualizado.' : 'Proyecto guardado.';
+            cancelarEdicion();
+            mostrarMensajeFormulario(wasEditing ? 'Proyecto actualizado correctamente.' : 'Proyecto guardado correctamente.', 'success');
             await cargarProyectos();
-        } catch (error) { message.textContent = error.message; }
+        } catch (error) { mostrarMensajeFormulario(error.message, 'error'); }
     });
 });

@@ -26,7 +26,10 @@ function renderProject(project, techCatalog, languageCatalog) {
     const card = document.createElement('article');
     card.className = 'public-project';
     const title = document.createElement('h3'); title.textContent = project.nombre;
-    const stage = document.createElement('strong'); stage.textContent = project.etapa;
+    const stage = document.createElement('strong');
+    stage.className = 'stage-badge';
+    stage.dataset.etapa = project.etapa;
+    stage.textContent = project.etapa;
     const description = document.createElement('p'); description.textContent = project.descripcion || 'Sin descripción.';
     const technologies = document.createElement('p');
     technologies.className = 'project-meta';
@@ -87,13 +90,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         else result.proyectos.forEach(project => projectsNode.append(renderProject(project, techCatalog, languageCatalog)));
 
         skillsNode.replaceChildren();
-        if (!result.habilidades?.length) skillsNode.textContent = 'Sin habilidades publicadas.';
-        else result.habilidades.forEach(skill => {
-            const tag = document.createElement('span');
-            tag.className = 'tag';
-            tag.textContent = `${techCatalog.get(Number(skill.tecnologia_id)) || `Tecnología #${skill.tecnologia_id}`} · ${skill.nivel}`;
-            skillsNode.append(tag);
-        });
+        const techSkills = Array.isArray(result.habilidades) ? result.habilidades : [];
+        const langSkills = Array.isArray(result.lenguajes) ? result.lenguajes : [];
+        if (!techSkills.length && !langSkills.length) {
+            skillsNode.textContent = 'Sin habilidades publicadas.';
+        } else {
+            techSkills.forEach(skill => {
+                const tag = document.createElement('span');
+                tag.className = 'tag';
+                tag.dataset.nivel = skill.nivel;
+                tag.textContent = `${techCatalog.get(Number(skill.tecnologia_id)) || `Tecnología #${skill.tecnologia_id}`} · ${skill.nivel}`;
+                skillsNode.append(tag);
+            });
+            langSkills.forEach(skill => {
+                const tag = document.createElement('span');
+                tag.className = 'tag';
+                tag.dataset.nivel = skill.nivel;
+                tag.textContent = `${languageCatalog.get(Number(skill.lenguaje_id)) || `Lenguaje #${skill.lenguaje_id}`} · ${skill.nivel}`;
+                skillsNode.append(tag);
+            });
+        }
         document.title = `${profile.nombre_completo || profile.username} | DevPortfolio`;
     } catch (error) {
         profileNode.replaceChildren();
@@ -124,9 +140,10 @@ async function configurarMenuSesion() {
         const directory = document.createElement('a'); directory.href = '/'; directory.textContent = 'Todos los desarrolladores';
         const username = document.createElement('span'); username.textContent = user.nombre_completo || user.username;
         const dashboard = document.createElement('a'); dashboard.href = '/views/dashboard.html'; dashboard.textContent = 'Mi panel';
+        const profileLink = document.createElement('a'); profileLink.href = '/views/perfil.html'; profileLink.textContent = 'Mi Perfil';
         const logout = document.createElement('button'); logout.type = 'button'; logout.textContent = 'Cerrar sesión';
         logout.addEventListener('click', cerrarSesion);
-        nav.append(directory, username, dashboard, logout);
+        nav.append(directory, username, dashboard, profileLink, logout);
     } catch (_) {
         // Si el backend no responde temporalmente, se conserva la vista pública.
     }

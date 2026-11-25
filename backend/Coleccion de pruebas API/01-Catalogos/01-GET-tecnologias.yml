@@ -1,0 +1,28 @@
+info:
+  name: GET /catalogo/tecnologias
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/catalogo/tecnologias"
+  auth: none
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("Devuelve 200 OK con lista de tecnologías", function () {
+          expect(res.getStatus()).to.equal(200);
+          const body = res.getBody();
+          const lista = Array.isArray(body) ? body : (body.data || body.tecnologias || body.results || []);
+          expect(lista).to.be.an("array");
+          expect(lista.length).to.be.greaterThan(0);
+          bru.setVar("techId", lista[0].id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

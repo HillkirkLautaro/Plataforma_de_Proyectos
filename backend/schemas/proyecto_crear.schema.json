@@ -13,11 +13,11 @@
     "fecha_inicio": {"anyOf": [{"type": "string", "format": "date"}, {"type": "null"}]},
     "fecha_fin": {"anyOf": [{"type": "string", "format": "date"}, {"type": "null"}]},
     "deadline": {"anyOf": [{"type": "string", "format": "date"}, {"type": "null"}]},
-    "tecnologias": {"type": "array", "items": {"$ref": "#/$defs/referenciaCatalogo"}},
-    "lenguajes": {"type": "array", "items": {"$ref": "#/$defs/referenciaCatalogo"}},
+    "tecnologias": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/referenciaCatalogo"}},
+    "lenguajes": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/referenciaCatalogo"}},
     "links": {"type": "array", "maxItems": 3, "items": {"$ref": "#/$defs/enlace"}}
   },
-  "required": ["nombre"],
+  "required": ["nombre", "tecnologias", "lenguajes"],
   "additionalProperties": false,
   "$defs": {
     "referenciaCatalogo": {

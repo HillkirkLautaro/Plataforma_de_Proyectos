@@ -1,0 +1,7 @@
+info:
+  name: 01 - Catálogos
+  type: folder
+  seq: 1
+
+request:
+  auth: none

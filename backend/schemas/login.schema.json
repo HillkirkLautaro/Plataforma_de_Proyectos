@@ -5,9 +5,21 @@
   "description": "Credenciales aceptadas por POST /api/auth/login.",
   "type": "object",
   "properties": {
-    "username": {"type": "string", "minLength": 1},
-    "email": {"type": "string", "minLength": 1},
-    "password": {"type": "string", "minLength": 1}
+    "username": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 50
+    },
+    "email": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 100
+    },
+    "password": {
+      "type": "string",
+      "minLength": 12,
+      "maxLength": 72
+    }
   },
   "required": ["password"],
   "anyOf": [

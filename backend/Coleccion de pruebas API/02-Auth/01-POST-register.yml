@@ -1,0 +1,45 @@
+info:
+  name: POST /auth/register (auto-login)
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/auth/register"
+  body:
+    type: json
+    data: |-
+      {
+        "username": "{{testUsername}}",
+        "email": "{{testEmail}}",
+        "password": "{{testPassword}}",
+        "nombre_completo": "Usuario Bruno"
+      }
+  auth: none
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        const ts = Date.now();
+        bru.setVar("testUsername", `bruno_${ts}`);
+        bru.setVar("testEmail", `bruno_${ts}@example.com`);
+        bru.setVar("testPassword", "PasswordSegura123!");
+    - type: tests
+      code: |-
+        test("Registra usuario y devuelve 201 con sesión JWT", function () {
+          expect(res.getStatus()).to.equal(201);
+          const body = res.getBody();
+          expect(body.token).to.be.a("string");
+          expect(body.token_type).to.equal("Bearer");
+          expect(body.usuario).to.be.an("object");
+          expect(body.usuario.username).to.equal(bru.getVar("testUsername"));
+          bru.setVar("token", body.token);
+          bru.setVar("userId", body.usuario.id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

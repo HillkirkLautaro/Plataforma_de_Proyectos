@@ -1,22 +1,13 @@
 from datetime import datetime, timedelta, timezone
-import re
 import uuid
 
 import jwt
 from flask import Blueprint, current_app, request, jsonify
-from jsonschema import Draft202012Validator, FormatChecker, ValidationError
 from mysql.connector import IntegrityError
 from models.usuario import Usuario
+from services.schema_validator import validar_schema
 
 auth_bp = Blueprint('auth_bp', __name__)
-
-
-def _validar_schema(data, schema):
-    try:
-        Draft202012Validator(schema, format_checker=FormatChecker()).validate(data)
-    except ValidationError as exc:
-        return exc.message
-    return None
 
 
 def _hay_sesion_activa():
@@ -37,76 +28,7 @@ def _hay_sesion_activa():
         return False
 
 
-@auth_bp.route('/register', methods=['POST'])
-def register():
-    if _hay_sesion_activa():
-        return jsonify({'error': 'Ya hay una sesión iniciada', 'redirect': '/dashboard'}), 409
-    data = request.get_json(silent=True)
-    if not isinstance(data, dict):
-        return jsonify({'error': 'Se requiere un objeto JSON válido'}), 400
-    username = data.get('username')
-    email = data.get('email')
-    password = data.get('password')
-    if not all(isinstance(value, str) for value in (username, email, password)):
-        return jsonify({'error': 'username, email y password son obligatorios'}), 400
-    username, email, password = username.strip(), email.strip().lower(), password
-    if not re.fullmatch(r'[A-Za-z0-9_.-]{3,50}', username):
-        return jsonify({'error': 'El usuario debe tener 3-50 caracteres alfanuméricos, . _ o -'}), 400
-    if len(email) > 100 or not re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', email):
-        return jsonify({'error': 'Correo electrónico inválido'}), 400
-    if not 12 <= len(password) <= 72:
-        return jsonify({'error': 'La contraseña debe tener entre 12 y 72 caracteres'}), 400
-    nombre = data.get('nombre_completo', '')
-    bio = data.get('bio', '')
-    if not isinstance(nombre, str) or not isinstance(bio, str):
-        return jsonify({'error': 'nombre_completo y bio deben ser texto'}), 400
-    if len(nombre) > 100 or len(bio) > 10000:
-        return jsonify({'error': 'Algún campo excede la longitud permitida'}), 400
-    payload_validacion = dict(data)
-    payload_validacion.update(username=username, email=email)
-    error_schema = _validar_schema(payload_validacion, Usuario.SCHEMA_REGISTRO)
-    if error_schema:
-        return jsonify({'error': error_schema}), 400
-    try:
-        user_id = Usuario.crear(
-            username,
-            email,
-            password,
-            nombre.strip(),
-            bio.strip()
-        )
-        return jsonify({'mensaje': 'Usuario registrado exitosamente', 'id': user_id}), 201
-    except IntegrityError:
-        return jsonify({'error': 'El usuario o correo ya está registrado'}), 409
-    except Exception:
-        current_app.logger.exception('Error al registrar usuario')
-        return jsonify({'error': 'No se pudo completar el registro'}), 500
-
-@auth_bp.route('/login', methods=['POST'])
-def login():
-    # No emitir una segunda sesión cuando el cliente ya presenta un JWT vigente.
-    if _hay_sesion_activa():
-        return jsonify({'error': 'Ya hay una sesión iniciada', 'redirect': '/dashboard'}), 409
-
-    data = request.get_json(silent=True)
-    if not isinstance(data, dict):
-        return jsonify({'error': 'Se requiere un objeto JSON válido'}), 400
-    error_schema = _validar_schema(data, Usuario.SCHEMA_LOGIN)
-    if error_schema:
-        return jsonify({'error': error_schema}), 400
-    identificador = data.get('username') or data.get('email')
-    password = data.get('password')
-    if not isinstance(identificador, str) or not isinstance(password, str) or not identificador or not password:
-        return jsonify({'error': 'Credenciales requeridas'}), 400
-        
-    try:
-        user = Usuario.obtener_por_credencial(identificador.strip().lower() if '@' in identificador else identificador.strip())
-    except Exception:
-        current_app.logger.exception('Error al consultar usuario para login')
-        return jsonify({'error': 'No se pudo completar el inicio de sesión'}), 500
-    if not user or not Usuario.verificar_password(user['password_hash'], password):
-        return jsonify({'error': 'Credenciales incorrectas'}), 401
-        
+def _generar_respuesta_sesion(user, mensaje):
     now = datetime.now(timezone.utc)
     expires_minutes = current_app.config['JWT_EXP_MINUTES']
     payload = {
@@ -119,6 +41,109 @@ def login():
         'jti': uuid.uuid4().hex,
     }
     token = jwt.encode(payload, current_app.config['JWT_SECRET'], algorithm='HS256')
-    return jsonify({'token': token, 'token_type': 'Bearer', 'expires_in': expires_minutes * 60,
-                    'usuario': {'id': user['id'], 'username': user['username'], 'email': user['email'],
-                                'nombre_completo': user.get('nombre_completo') or user['username']}}), 200
+    return {
+        'mensaje': mensaje,
+        'token': token,
+        'token_type': 'Bearer',
+        'expires_in': expires_minutes * 60,
+        'usuario': {
+            'id': user['id'],
+            'username': user['username'],
+            'email': user['email'],
+            'nombre_completo': user.get('nombre_completo') or user['username'],
+        },
+    }
+
+
+@auth_bp.route('/register', methods=['POST'])
+def register():
+    if _hay_sesion_activa():
+        return jsonify({'error': 'Ya tienes una sesión iniciada.', 'redirect': '/dashboard'}), 409
+
+    data = request.get_json(silent=True)
+
+    if isinstance(data, dict):
+        data = dict(data)
+        if isinstance(data.get('username'), str):
+            data['username'] = data['username'].strip()
+        if isinstance(data.get('email'), str):
+            data['email'] = data['email'].strip().lower()
+        if isinstance(data.get('nombre_completo'), str):
+            data['nombre_completo'] = data['nombre_completo'].strip()
+        if isinstance(data.get('bio'), str):
+            data['bio'] = data['bio'].strip()
+
+    error_schema = validar_schema(data, Usuario.SCHEMA_REGISTRO)
+    if error_schema:
+        return jsonify({'error': error_schema}), 400
+
+    try:
+        user_id = Usuario.crear(
+            data['username'],
+            data['email'],
+            data['password'],
+            data.get('nombre_completo', ''),
+            data.get('bio', '')
+        )
+    except IntegrityError:
+        return jsonify({'error': 'El nombre de usuario o el correo electrónico ya se encuentran registrados.'}), 409
+    except Exception:
+        current_app.logger.exception('Error al registrar usuario')
+        return jsonify({'error': 'No pudimos completar tu registro en este momento. Intenta nuevamente más tarde.'}), 500
+
+    nuevo_usuario = {
+        'id': user_id,
+        'username': data['username'],
+        'email': data['email'],
+        'nombre_completo': data.get('nombre_completo') or data['username'],
+        'rol': 'usuario',
+    }
+    try:
+        respuesta = _generar_respuesta_sesion(nuevo_usuario, 'Usuario registrado exitosamente.')
+        respuesta['id'] = user_id
+        return jsonify(respuesta), 201
+    except Exception:
+        current_app.logger.exception('Usuario %s registrado, pero falló la generación del token JWT', user_id)
+        return jsonify({
+            'mensaje': 'Tu cuenta fue creada exitosamente, pero no pudimos iniciar tu sesión automáticamente. Por favor, inicia sesión manualmente.',
+            'id': user_id,
+            'usuario': {
+                'id': user_id,
+                'username': nuevo_usuario['username'],
+                'email': nuevo_usuario['email'],
+                'nombre_completo': nuevo_usuario['nombre_completo'],
+            },
+        }), 201
+    
+@auth_bp.route('/login', methods=['POST'])
+def login():
+    # No emitir una segunda sesión cuando el cliente ya presenta un JWT vigente.
+    if _hay_sesion_activa():
+        return jsonify({'error': 'Ya tienes una sesión iniciada.', 'redirect': '/dashboard'}), 409
+
+    data = request.get_json(silent=True)
+
+    if isinstance(data, dict):
+        data = dict(data)
+        if isinstance(data.get('username'), str):
+            data['username'] = data['username'].strip()
+        if isinstance(data.get('email'), str):
+            data['email'] = data['email'].strip().lower()
+
+    error_schema = validar_schema(data, Usuario.SCHEMA_LOGIN)
+    if error_schema:
+        return jsonify({'error': error_schema}), 400
+
+    identificador = data.get('username') or data.get('email')
+    password = data['password']
+
+    try:
+        user = Usuario.obtener_por_credencial(identificador)
+    except Exception:
+        current_app.logger.exception('Error al consultar usuario para login')
+        return jsonify({'error': 'No pudimos iniciar tu sesión en este momento. Intenta nuevamente más tarde.'}), 500
+
+    if not user or not Usuario.verificar_password(user['password_hash'], password):
+        return jsonify({'error': 'El usuario o la contraseña son incorrectos.'}), 401
+
+    return jsonify(_generar_respuesta_sesion(user, 'Inicio de sesión exitoso.')), 200
